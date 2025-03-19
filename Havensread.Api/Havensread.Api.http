@@ -1,0 +1,6 @@
+@Havensread.Api_HostAddress = http://localhost:5106
+
+GET {{Havensread.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

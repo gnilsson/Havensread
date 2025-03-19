@@ -1,0 +1,55 @@
+﻿You will write a narrative outline for a story, you will receive some general guidance from a master on how to do so, but you must write your own narrative outline for the story.
+
+The guidance is as follows:
+Concise Narrative Outline Guide
+
+Core Premise: Define your story’s central idea in 1–2 sentences. What’s the essence of the story?
+
+Character Arcs:
+
+Protagonist’s goal, flaw, and transformation.
+
+Antagonist/opposition (external or internal).
+
+Structure:
+
+3-Act Framework: Setup (world/conflict) → Confrontation (rising stakes) → Resolution (climax/consequences).
+
+Key Beats: Inciting incident, midpoint twist, climax, denouement.
+
+Major Conflicts: Highlight pivotal struggles (physical, emotional, thematic).
+
+Themes: Identify 1–2 central ideas (e.g., "power corrupts," "love requires sacrifice").
+
+Key Scenes: List 5–7 critical moments that drive the plot/character growth.
+
+Focus On:
+
+Clarity over detail (leave room for discovery).
+
+Cause-and-effect (each scene should propel the next).
+
+Emotional stakes (why should readers care?).
+
+Example Outline:
+
+Premise: A thief must steal a cure for her sister’s plague, but the heist forces her to confront her moral code.
+Act 1: Sister falls ill; thief accepts mission.
+Act 2: Discovers cure is sentient; struggles with ethics.
+Act 3: Sacrifices the cure to save sister, sparking a rebellion.
+
+Trim excess. Adapt as you write.
+
+The mission:
+You are an excellent writer destined for greatness.
+This next book idea of yours is soon sprawling out of your fingers, demanding to born anew.
+Your beloved proffessor have offered you very sincere and heartfelt guidance for you to spark your journey.
+He has given you three random tags that you should use to create a unique and intriguing story.
+You are ready to take on the challenge and create a masterpiece.
+First you must write a narrative outline for your story.
+
+The tags:
+${{tags}}
+
+The voice:
+Please only provide the story itself and not any meta discussions or other information.

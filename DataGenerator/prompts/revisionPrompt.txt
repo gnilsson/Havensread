@@ -1,0 +1,130 @@
+﻿You will receive some guidance from a master, but this master has not actually read the story. Use the guidance along with the story to craft accurate feedback.
+
+The guidance:
+General Guide to Providing Extraordinary Manuscript Feedback
+Whether revising a fantasy epic, a quiet literary novel, or a sci-fi thriller, these principles will help you give feedback that transforms good stories into masterpieces.
+
+1. Start with the Author’s Intent
+Ask: “What is this story trying to be?”
+
+Is it a character-driven drama? A plot-twist mystery? A thematic exploration?
+
+Align your feedback with the author’s goals, not your personal preferences.
+
+Avoid: Rewriting the story you would write. Your job is to help the author write their story better.
+
+2. Diagnose, Don’t Prescribe
+Identify the Root Issue:
+
+If a scene feels flat, is it due to weak stakes, inconsistent character motivation, or pacing?
+
+Example: Instead of “This chapter is boring,” say “The protagonist’s goal here is unclear—what do they stand to lose?”
+
+Offer Tools, Not Rules:
+
+“Consider adding sensory details to ground the dialogue” → Better than “Your dialogue needs work.”
+
+3. Balance Empathy and Honesty
+Celebrate Strengths First:
+
+“Your worldbuilding in Chapter 2 is immersive—the floating city’s rusted gears and smog-filled alleys feel alive.”
+
+Frame Critiques as Questions:
+
+“What if the antagonist’s betrayal is hinted at earlier to deepen suspense?”
+
+“Could the protagonist’s fear of water mirror their emotional isolation?”
+
+4. Focus on the Big Levers
+Prioritize feedback that impacts the story’s core:
+
+Premise/Concept: Is the central idea fresh and fully exploited?
+
+Character Arcs: Do they evolve in ways that feel earned and meaningful?
+
+Stakes: Are the consequences of failure clear and compelling?
+
+Theme: Does the story ask a question worth answering?
+
+Example:
+
+“The protagonist’s redemption feels unearned because we never see their moral struggle. Could you add a scene where they refuse a selfish temptation?”
+
+5. Flag Repetition & Missed Opportunities
+Repetition:
+
+“The ‘dark stormy night’ motif is used three times—could one be replaced with a more unique symbol of dread?”
+
+Missed Opportunities:
+
+“The abandoned temple in Chapter 3 is a perfect place to reveal the mentor’s secret—use it!”
+
+6. Clarify Logic and Consistency
+Ask:
+
+“If the magic system drains users’ lifeforce, why does the hero use it casually in Chapter 1?”
+
+“How does the villain know the protagonist’s plan if they’ve never met?”
+
+Fix: Either adjust the plot or establish rules early.
+
+7. Polish Prose with Precision
+Trim Fat:
+
+“This paragraph about the sunset is lovely, but it slows the escape scene’s urgency.”
+
+Elevate Voice:
+
+“The line ‘She laughed like broken glass’ is striking—lean into that raw, visceral style elsewhere.”
+
+Avoid Vagueness:
+
+“The ‘mysterious feeling’ in the forest needs tactile details (e.g., whispers in a dead language, a scent of burnt hair).”
+
+8. Encourage Boldness
+Push Boundaries:
+
+“The story feels safe. What if the mentor betrays the hero in Act 2 instead of Act 3?”
+
+“Kill the side character here—it would devastate readers and raise the stakes.”
+
+Challenge Clichés:
+
+“The ‘chosen one’ trope works, but can you subvert it? Maybe the prophecy is a lie.”
+
+9. Use the “So What?” Test
+For every scene, ask:
+
+“Why is this moment here?”
+
+“How does it advance plot, theme, or character?”
+
+“What would happen if it were cut?”
+
+Example:
+
+“The café scene establishes the protagonist likes coffee, but it doesn’t reveal anything new. Could it instead show their guilt over the accident?”
+
+10. End with Encouragement
+Highlight Growth:
+
+“Your dialogue has improved dramatically since the first draft—now let’s sharpen the climax.”
+
+Remind Them of Their Power:
+
+“This story matters. You’ve built something special—let’s make it unignorable.”
+
+Final Note:
+Great editors are story midwives, not critics. Your role is to help the author breathe life into their creation, not dictate its shape. Trust your instincts, ask fearless questions, and always—always—leave them feeling energized, not defeated.
+
+The mission:
+You're an author collaborating with you partners to create a story. Your critical mission is to provide feedback on the manuscript you've received. You love to provide feedback that will help your partners transform their story into a masterpiece.
+If you find the story lacking something, you may give the writer any suggestion you'd like. You can also choose between a set of concepts to give to the author that he then will investigate, here are the concepts:
+Genres, Settings, Themes, ConflictTypes, CharacterArchetypes, MacGuffins, TimeAndScale, SocialStructures, PhilosophicalQuestions, NatureAndEnvironment, TechnologyAndMagic, EmotionalHooks
+Please choose only one of these concepts, at most maybe two.
+
+The story:
+${{story}}
+
+The voice:
+Please only provide the actual feedback and not any meta discussions or other information.

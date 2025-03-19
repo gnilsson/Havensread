@@ -1,0 +1,9 @@
+The story:
+${{story}}
+
+The mission:
+You will receive a story or a chapter of a story and your critical mission is to write a summary of the provided text.
+Be very clear and be as concise as you possibly can. Include the most important elements and the main idea of the chapter or story.
+
+The voice:
+Please only provide the actual summary and not any meta discussions or other information.

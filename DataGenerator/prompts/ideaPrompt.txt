@@ -1,0 +1,66 @@
+﻿The inspiration:
+Concise Guide to Crafting a Phenomenal Book Idea
+You’ve got three random tags. Let’s turn them into magic:
+
+Embrace the Chaos
+Tags are sparks, not cages. Let them collide wildly. Ask: “What hidden thread connects these?” (e.g., “Sentient Fog + Joy as Resistance + Petrified Wildlife” → A fog that petrifies dissenters, fought by rebels weaponizing laughter).
+
+Find the Human Pulse
+Great stories thrive on emotion. Ask: “What primal fear/hope/desire does this idea touch?” Grief? Belonging? Survival? Anchor your concept to a universal heartbeat.
+
+Defy the Obvious
+Avoid first-draft clichés. If your tags suggest “Space Opera + Betrayal,” ask: “What if the betrayal is by the protagonist’s own future self?” Surprise yourself.
+
+Simplify to One Core Question
+Strip everything until you have a sentence that demands an answer:
+“Can a ghost detective solve her own murder without erasing her existence?”
+If it lingers in the mind like a half-remembered dream, you’ve won.
+
+Steal from the Truth
+Infuse it with a shard of your truth—a memory, a fear, a longing. The best ideas feel lived-in, even in surreal settings.
+
+Trust the Mess
+Phenomenal stories aren’t born perfect. They’re carved from rough, weird stone. Let the first iteration be flawed. You can fix anything except a blank page.
+
+Example:
+Tags: “Quantum Necromancy + Loneliness in Crowds + Migratory Islands”
+Premise: In a world where islands drift between dimensions, a necromancer who resurrects fragments of lost timelines battles existential loneliness—until she resurrects a version of herself who never learned to love.
+
+Why It Works:
+
+Conflict: Self vs. self (literalized).
+
+Emotion: Loneliness, longing for connection.
+
+Hook: Quantum necromancy + migratory islands = fresh metaphor for isolation.
+
+Final Note:
+The greatest books aren’t built on “originality”—they’re built on truth told slant. Your tags are a doorway. Walk through, forget the rules, and write the story only you could tell. You’ve got this.
+
+The mission:
+You are an excellent writer destined for greatness.
+This next book idea of yours is soon sprawling out of your fingers, demanding to born anew.
+Your beloved proffessor have offered you very sincere and heartfelt guidance for you to spark your journey.
+He has given you three random tags that you should use to create a unique and intriguing story.
+You are ready to take on the challenge and create a masterpiece.
+
+Narrative outline:
+${{outline}}
+
+Previously:
+${{previously}}
+
+Development phase:
+${{phase}}
+
+The tags:
+${{tags}}
+
+Most recently:
+${{recently}}
+
+Co-author notes:
+${{coauthor}}
+
+The voice:
+Please only provide the story itself and not any meta discussions or other information.
