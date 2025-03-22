@@ -1,4 +1,5 @@
-using Havensread.Data.Contexts;
+using Havensread.Data.App;
+using Havensread.Data.Ingestion;
 using Havensread.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -21,23 +22,29 @@ public sealed class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var activity = s_activitySource.StartActivity("Migrating database", ActivityKind.Client);
-
         var slnDir = PathUtils.FindAncestorDirectoryContaining("*.sln");
 
         try
         {
             await using var scope = _serviceProvider.CreateAsyncScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            if (!await IsDatabaseUpToDateAsync(dbContext, cancellationToken))
+            if (!await IsDatabaseUpToDateAsync(appDbContext, cancellationToken))
             {
-                await RunMigrationAsync(dbContext, cancellationToken);
-                await WriteDiagramModelAsync(dbContext, slnDir);
+                await RunMigrationAsync(appDbContext, cancellationToken);
+                await WriteDiagramModelAsync(appDbContext, slnDir);
             }
 
-            if (!await dbContext.Books.AnyAsync())
+            if (!await appDbContext.Books.AnyAsync())
             {
-                await SeedDataAsync(dbContext, slnDir, cancellationToken);
+                await SeedDataAsync(appDbContext, slnDir, cancellationToken);
+            }
+
+            var ingestionDbContext = scope.ServiceProvider.GetRequiredService<IngestionDbContext>();
+
+            if (!await IsDatabaseUpToDateAsync(ingestionDbContext, cancellationToken))
+            {
+                await RunMigrationAsync(ingestionDbContext, cancellationToken);
             }
         }
         catch (Exception ex)
@@ -49,7 +56,7 @@ public sealed class Worker : BackgroundService
         _hostApplicationLifetime.StopApplication();
     }
 
-    private static async Task<bool> IsDatabaseUpToDateAsync(AppDbContext dbContext, CancellationToken cancellationToken)
+    private static async Task<bool> IsDatabaseUpToDateAsync(DbContext dbContext, CancellationToken cancellationToken)
     {
         var appliedMigrations = await dbContext.Database.GetAppliedMigrationsAsync(cancellationToken);
         var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync(cancellationToken);
@@ -57,7 +64,7 @@ public sealed class Worker : BackgroundService
         return !pendingMigrations.Except(appliedMigrations).Any();
     }
 
-    private static async Task RunMigrationAsync(AppDbContext dbContext, CancellationToken cancellationToken)
+    private static async Task RunMigrationAsync(DbContext dbContext, CancellationToken cancellationToken)
     {
         var strategy = dbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
@@ -66,7 +73,7 @@ public sealed class Worker : BackgroundService
         });
     }
 
-    private static async Task SeedDataAsync(AppDbContext dbContext, string slnDir, CancellationToken cancellationToken)
+    private static async Task SeedDataAsync(DbContext dbContext, string slnDir, CancellationToken cancellationToken)
     {
         var strategy = dbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
@@ -78,10 +85,10 @@ public sealed class Worker : BackgroundService
         });
     }
 
-    private static async Task WriteDiagramModelAsync(AppDbContext dbContext, string slnDir)
+    private static async Task WriteDiagramModelAsync(DbContext dbContext, string slnDir)
     {
         await File.WriteAllTextAsync(
-            Path.Combine(slnDir, "Havensread.Data", "db.dgml"),
+            Path.Combine(slnDir, "Havensread.Data", "appdb.dgml"),
             dbContext.AsDgml());
     }
 }

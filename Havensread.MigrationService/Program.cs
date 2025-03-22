@@ -7,7 +7,8 @@ builder.AddServiceDefaults();
 
 builder.Services.AddHostedService<Worker>();
 
-builder.Services.AddOpenTelemetry()
+builder.Services
+    .AddOpenTelemetry()
     .WithTracing(tracing => tracing.AddSource(Worker.ActivitySourceName));
 
 builder.AddDatabase();

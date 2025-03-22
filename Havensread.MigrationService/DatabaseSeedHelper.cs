@@ -1,11 +1,9 @@
-﻿using Havensread.Data;
-using Havensread;
-using Havensread.ServiceDefaults;
+﻿using Havensread.Data.App;
+using Havensread.DataIngestor;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Havensread.DataIngestor;
 
 namespace Havensread.MigrationService;
 

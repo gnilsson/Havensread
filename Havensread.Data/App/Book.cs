@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace Havensread.Data;
+namespace Havensread.Data.App;
 
 public sealed class Book
 {

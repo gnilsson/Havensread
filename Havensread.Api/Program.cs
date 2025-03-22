@@ -5,11 +5,19 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddUserSecrets<Program>();
+
 builder.AddServiceDefaults();
 
 builder.AddDatabase();
 
+builder.AddAIServices();
+
+builder.AddHttpClients();
+
 builder.Services.AddEndpoints();
+
+builder.Services.AddIngestionPipeline();
 
 builder.Services.AddOpenApi();
 

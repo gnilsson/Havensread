@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Havensread.Data.Contexts;
+namespace Havensread.Data.App;
 
 public sealed class AppDbContext : DbContext
 {
