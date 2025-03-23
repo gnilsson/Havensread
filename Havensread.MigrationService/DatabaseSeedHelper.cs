@@ -1,27 +1,60 @@
 ﻿using Havensread.Data.App;
+using Havensread.Data.Ingestion;
 using Havensread.DataIngestor;
+using Havensread.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
+using Qdrant.Client;
+using Qdrant.Client.Grpc;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace Havensread.MigrationService;
 
 public static class DatabaseSeedHelper
 {
-    private static readonly string[] _publicationDateFormats = ["M/d/yyyy", "MM/dd/yyyy"];
+    private static readonly string[] s_publicationDateFormats = ["M/d/yyyy", "MM/dd/yyyy"];
+    private static readonly JsonSerializerOptions s_jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public static async Task SeedDataAsync(DbContext context, string solutionDir, CancellationToken cancellationToken)
+    public static async Task GenerateIngestionSeedDataAsync(
+        IServiceProvider serviceProvider,
+        IngestionDbContext context,
+        string solutionDir,
+        CancellationToken cancellationToken)
     {
-        var booksDir = Path.Combine(solutionDir, "seeddata", "kaggle", "booksJson");
+        var jsonDir = Path.Combine(solutionDir, "seeddata", "ingestion");
+        if (!Directory.Exists(jsonDir)) return;
 
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, };
+        await foreach (var document in LocalStorageHelper.ReadFromJsonDiskAsync<IngestedDocument>(jsonDir, s_jsonOptions, cancellationToken))
+        {
+            context.Documents.Add(document);
+        }
+
+        var pointsJsonDir = Path.Combine(solutionDir, "seeddata", "points");
+        if (!Directory.Exists(pointsJsonDir)) return;
+
+        var points = await LocalStorageHelper
+            .ReadFromJsonDiskAsync<PointStruct>(pointsJsonDir, s_jsonOptions, cancellationToken)
+            .ToArrayAsync();
+
+        var qdrantClient = serviceProvider.GetRequiredService<QdrantClient>();
+        if (!await qdrantClient.CollectionExistsAsync(SourceName.Books))
+        {
+            await qdrantClient.CreateCollectionAsync(
+                SourceName.Books,
+                vectorsConfig: new VectorParams { Size = 1536, Distance = Distance.Cosine });
+        }
+        await qdrantClient.UpsertAsync(SourceName.Books, points);
+    }
+
+    public static async Task GenerateAppSeedDataAsync(AppDbContext context, string solutionDir, CancellationToken cancellationToken)
+    {
+        var jsonDir = Path.Combine(solutionDir, "seeddata", "kaggle", "booksJson");
+        if (!Directory.Exists(jsonDir)) return;
+
         List<string> existingAuthors = [];
-
-        await foreach (var kaggleBook in ReadBooksFromJsonFilesAsync(booksDir, options, cancellationToken))
+        await foreach (var kaggleBook in LocalStorageHelper.ReadFromJsonDiskAsync<Kaggle.Book>(jsonDir, s_jsonOptions, cancellationToken))
         {
             var authorNames = kaggleBook.Authors.Split('/').ToArray();
-            existingAuthors.AddRange(authorNames);
             var authors = authorNames.Select(a => new Author { Name = a }).ToArray();
 
             var book = new Book
@@ -42,51 +75,7 @@ public static class DatabaseSeedHelper
 
             context.Set<Author>().AddRange(authors.Where(a => !existingAuthors.Contains(a.Name)));
             context.Set<Book>().Add(book);
-        }
-    }
-
-    private static async Task SeedBooksAsync(DbContext context, string booksDir, CancellationToken cancellationToken)
-    {
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, };
-        List<string> existingAuthors = [];
-
-        await foreach (var kaggleBook in ReadBooksFromJsonFilesAsync(booksDir, options, cancellationToken))
-        {
-            var authorNames = kaggleBook.Authors.Split('/').ToArray();
-            var authors = authorNames.Select(a => new Author { Name = a }).ToArray();
-
-            var book = new Book
-            {
-                SourceId = kaggleBook.BookID,
-                Title = kaggleBook.Title,
-                Authors = authors,
-                AverageRating = kaggleBook.AverageRating,
-                RatingsCount = kaggleBook.RatingsCount,
-                Publisher = kaggleBook.Publisher,
-                ISBN = kaggleBook.ISBN,
-                ISBN13 = kaggleBook.ISBN13,
-                LanguageCode = kaggleBook.LanguageCode,
-                NumPages = kaggleBook.NumPages,
-                TextReviewsCount = kaggleBook.TextReviewsCount,
-                PublicationDate = ParsePublicationDate(kaggleBook.PublicationDate)
-            };
-
-            context.Set<Author>().AddRange(authors.Where(a => !existingAuthors.Contains(a.Name)));
-            context.Set<Book>().Add(book);
             existingAuthors.AddRange(authorNames);
-        }
-    }
-
-    private static async IAsyncEnumerable<Kaggle.Book> ReadBooksFromJsonFilesAsync(
-        string jsonDir,
-        JsonSerializerOptions options,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        foreach (var file in Directory.EnumerateFiles(jsonDir, "*.json"))
-        {
-            await using var stream = File.OpenRead(file);
-            var book = await JsonSerializer.DeserializeAsync<Kaggle.Book>(stream, options, cancellationToken);
-            if (book is not null) yield return book;
         }
     }
 
@@ -94,7 +83,7 @@ public static class DatabaseSeedHelper
     {
         if (DateTime.TryParseExact(
             publicationDate,
-            _publicationDateFormats,
+            s_publicationDateFormats,
             CultureInfo.InvariantCulture,
             DateTimeStyles.None,
             out var date))

@@ -4,6 +4,8 @@ namespace Havensread.Data.Ingestion;
 
 public sealed class IngestionDbContext : DbContext
 {
+    public const string SchemaName = "ingestion";
+
     public IngestionDbContext(DbContextOptions options) : base(options)
     { }
 
@@ -13,7 +15,7 @@ public sealed class IngestionDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("ingestion");
+        modelBuilder.HasDefaultSchema(SchemaName);
 
         modelBuilder.Entity<IngestedDocument>(document =>
         {

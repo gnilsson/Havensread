@@ -21,7 +21,7 @@ namespace Havensread.Data.Migrations.Ingestion
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     source = table.Column<string>(type: "text", nullable: false),
-                    version = table.Column<string>(type: "text", nullable: false),
+                    version = table.Column<int>(type: "integer", nullable: false),
                     timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>

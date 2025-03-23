@@ -1,4 +1,5 @@
-﻿using Havensread.Data.App;
+﻿using Havensread.Api.Data;
+using Havensread.Data.App;
 using Havensread.Data.Ingestion;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -11,17 +12,26 @@ public static class ApplicationInitializationExtensions
     public static IHostApplicationBuilder AddDatabase(this IHostApplicationBuilder builder)
     {
         return builder
-            .AddDatabase<AppDbContext>("havensread-appdb", "app")
-            .AddDatabase<IngestionDbContext>("havensread-ingestiondb", "ingestion");
+            .AddDatabaseContext<AppDbContext>("havensread-appdb", AppDbContext.SchemaName)
+            .AddDatabaseContext<IngestionDbContext>("havensread-ingestiondb", IngestionDbContext.SchemaName, options =>
+            {
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.AddInterceptors(new DevelopmentIngestionInterceptor());
+                }
+            });
     }
 
-    private static IHostApplicationBuilder AddDatabase<TContext>(
+    private static IHostApplicationBuilder AddDatabaseContext<TContext>(
         this IHostApplicationBuilder builder,
         string orchestrationName,
-        string migrationsHistoryTableName) where TContext : DbContext
+        string migrationsHistoryTableName,
+        Action<DbContextOptionsBuilder>? additionalOptions = null) where TContext : DbContext
     {
         builder.AddNpgsqlDbContext<TContext>(orchestrationName, null, options =>
         {
+            additionalOptions?.Invoke(options);
+
             options.UseNpgsql(o =>
             {
                 o.EnableRetryOnFailure();

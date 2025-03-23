@@ -1,4 +1,4 @@
-﻿namespace Havensread.Api.Ingestion;
+﻿namespace Havensread.ServiceDefaults;
 
 public static class SourceName
 {

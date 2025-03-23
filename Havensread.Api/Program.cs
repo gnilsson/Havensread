@@ -1,3 +1,4 @@
+using Havensread.Api.ErrorHandling;
 using Havensread.Api.ServiceConfiguration;
 using Havensread.Data;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +12,13 @@ builder.AddServiceDefaults();
 
 builder.AddDatabase();
 
+builder.AddVectorStore();
+
 builder.AddAIServices();
 
 builder.AddHttpClients();
+
+builder.Services.AddScoped<ExceptionHandler>();
 
 builder.Services.AddEndpoints();
 
@@ -30,6 +35,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.UseMiddlewares();
 
 app.MapEndpoints();
 

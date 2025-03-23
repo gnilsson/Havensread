@@ -1,5 +1,4 @@
-﻿using Havensread.Api.Endpoints;
-using Havensread.Api.Ingestion;
+﻿using Havensread.IngestionService.Apis;
 using Havensread.ServiceDefaults;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
@@ -10,16 +9,10 @@ using System.ClientModel;
 using System.Net;
 using System.Net.Http.Headers;
 
-namespace Havensread.Api.ServiceConfiguration;
+namespace Havensread.IngestionService;
 
 public static class ApplicationInitializationExtensions
 {
-    public static IServiceCollection AddEndpoints(this IServiceCollection services)
-    {
-        services.AddScoped<GetBooks.Endpoint>();
-        return services;
-    }
-
     public static IServiceCollection AddIngestionPipeline(this IServiceCollection services)
     {
         services.AddScoped<BookIngestionDataCollector>();

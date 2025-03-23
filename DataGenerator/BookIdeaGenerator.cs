@@ -54,7 +54,7 @@ public sealed class BookIdeaGenerator : GeneratorBase<BookIdea>
         if (Directory.GetFiles(OutputDirPath).Length > 0) yield break;
 
         //C:\dev\Havensread\DataGenerator\prompts\bookIdeaPrompt.txt
-        var solutionDir = PathUtils.FindAncestorDirectoryContaining("*.sln");
+        var solutionDir = PathUtils.SolutionDirectory;
         var promptsDir = Path.Combine(solutionDir, "DataGenerator", "prompts");
 
 

@@ -19,7 +19,9 @@ var migrations = builder.AddProject<Projects.Havensread_MigrationService>("migra
     .WithReference(appDb)
     .WaitFor(appDb)
     .WithReference(ingDb)
-    .WaitFor(ingDb);
+    .WaitFor(ingDb)
+    .WithReference(vectorDb)
+    .WaitFor(vectorDb);
 
 var api = builder
     .AddProject<Projects.Havensread_Api>("havensread-api")

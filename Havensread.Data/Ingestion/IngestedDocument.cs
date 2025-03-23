@@ -8,7 +8,7 @@ public sealed class IngestedDocument
 
     //public required SourceReadingStrategy ReadingStrategy { get; init; }
 
-    //public int Version { get; set; }
+    public int Version { get; set; }
 
     public DateTimeOffset Timestamp { get; set; }
 

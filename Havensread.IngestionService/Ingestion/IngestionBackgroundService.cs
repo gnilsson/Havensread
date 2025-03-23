@@ -7,7 +7,7 @@ using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using System.Text.Json;
 
-namespace Havensread.Api.Ingestion;
+namespace Havensread.IngestionService;
 
 public sealed class IngestionBackgroundService : MonitoredBackgroundService
 {
@@ -40,13 +40,6 @@ public sealed class IngestionBackgroundService : MonitoredBackgroundService
 
     protected override async Task RunAsync(CancellationToken stoppingToken)
     {
-        //if (!await _qdrantClient.CollectionExistsAsync(SourceName.Books))
-        //{
-        //    await _qdrantClient.CreateCollectionAsync(
-        //        SourceName.Books,
-        //        vectorsConfig: new VectorParams { Size = 1536, Distance = Distance.Cosine });
-        //}
-
         var requestBatch = new BookIngestionDataCollector.Request[BatchSize];
         var count = BatchSize;
 

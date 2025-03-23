@@ -37,9 +37,8 @@ namespace Havensread.Data.Migrations.Ingestion
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
 
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
                         .HasColumnName("version");
 
                     b.HasKey("Id", "Source")

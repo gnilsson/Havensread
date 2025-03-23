@@ -1,15 +1,21 @@
 using Havensread.Data;
-using Havensread.MigrationService;
+using Havensread.MigrationService.Workers;
+using Havensread.ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddHostedService<Worker>();
+builder.AddVectorStore();
+
+builder.Services.AddSingleton<AppWorker>();
+builder.Services.AddSingleton<IngestionWorker>();
+builder.Services.AddHostedService<WorkerCoordinator>();
 
 builder.Services
     .AddOpenTelemetry()
-    .WithTracing(tracing => tracing.AddSource(Worker.ActivitySourceName));
+    .WithTracing(tracing => tracing.AddSource(AppWorker.ActivitySourceName))
+    .WithTracing(tracing => tracing.AddSource(IngestionWorker.ActivitySourceName));
 
 builder.AddDatabase();
 

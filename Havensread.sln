@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.Data", "Havensre
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.MigrationService", "Havensread.MigrationService\Havensread.MigrationService.csproj", "{51BF9558-2E9F-4072-985E-3E16DA492595}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.IngestionService", "Havensread.IngestionService\Havensread.IngestionService.csproj", "{0759033D-A54B-40E4-8483-6A005565CF11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{51BF9558-2E9F-4072-985E-3E16DA492595}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51BF9558-2E9F-4072-985E-3E16DA492595}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51BF9558-2E9F-4072-985E-3E16DA492595}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0759033D-A54B-40E4-8483-6A005565CF11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0759033D-A54B-40E4-8483-6A005565CF11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0759033D-A54B-40E4-8483-6A005565CF11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0759033D-A54B-40E4-8483-6A005565CF11}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

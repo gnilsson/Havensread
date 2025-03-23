@@ -8,7 +8,5 @@ var builder = new ConfigurationBuilder()
 
 var kaggleApiKey = builder.GetRequiredSection(Kaggle.Settings.SectionName).Get<Kaggle.Settings>()!;
 
-var solutionDir = PathUtils.FindAncestorDirectoryContaining("*.sln");
-
-var kaggleIngestor = new KaggleIngestor(kaggleApiKey, solutionDir);
+var kaggleIngestor = new KaggleIngestor(kaggleApiKey, PathUtils.SolutionDirectory);
 await kaggleIngestor.RunAsync();

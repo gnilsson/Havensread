@@ -27,13 +27,16 @@ public sealed class GetBooks
 
         public Task<IResult> HandleAsync(Request request, HttpContext _, CancellationToken cancellationToken)
         {
-            var query = _dbContext.Set<Book>().AsNoTracking().Where(x => x.PublicationDate != DateTime.MinValue);
+            var query = _dbContext.Books
+                .AsNoTracking()
+                .Where(x => x.PublicationDate != DateTime.MinValue)
+                .Where(x => x.Title.Contains("Harry Potter"));
 
             var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
             return Task.FromResult(Results.Stream(async (stream) =>
             {
-                await foreach (var book in query.Take(20).AsAsyncEnumerable())
+                await foreach (var book in query.Take(50).AsAsyncEnumerable())
                 {
                     await JsonSerializer.SerializeAsync(stream, book, serializerOptions, cancellationToken);
                     await stream.FlushAsync();

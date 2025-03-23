@@ -6,6 +6,8 @@ namespace Havensread.Data.App;
 
 public sealed class AppDbContext : DbContext
 {
+    public const string SchemaName = "app";
+
     public AppDbContext(DbContextOptions options) : base(options)
     { }
 
@@ -15,7 +17,7 @@ public sealed class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("app");
+        modelBuilder.HasDefaultSchema(SchemaName);
 
         modelBuilder.Entity<Book>(book =>
         {

@@ -119,4 +119,15 @@ public static class Extensions
 
         return app;
     }
+
+    public static IHostApplicationBuilder AddVectorStore(this IHostApplicationBuilder builder)
+    {
+        //builder.Services.AddSingleton<IVectorStore, QdrantVectorStore>();
+        builder.AddQdrantClient("havensread-vectordb", o =>
+        {
+        });
+
+        return builder;
+    }
+
 }

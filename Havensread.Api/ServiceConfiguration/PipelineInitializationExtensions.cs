@@ -1,8 +1,9 @@
 ﻿using Havensread.Api.Endpoints;
+using Havensread.Api.ErrorHandling;
 
 namespace Havensread.Api.ServiceConfiguration;
 
-public static class PipelineExecutionExtensions
+public static class PipelineInitializationExtensions
 {
     public static WebApplication MapEndpoints(this WebApplication app)
     {
@@ -17,6 +18,17 @@ public static class PipelineExecutionExtensions
 
     public static WebApplication UseMiddlewares(this WebApplication app)
     {
+        app.UseExceptionHandler(errApp =>
+        {
+            errApp.Run(async context =>
+            {
+                await using var scope = errApp.ApplicationServices.CreateAsyncScope();
+                var exceptionHandler = scope.ServiceProvider.GetRequiredService<ExceptionHandler>();
+
+                await exceptionHandler.HandleExceptionAsync(context);
+            });
+        });
+
         return app;
     }
 }
