@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Havensread.IngestionService-1f499fb2-59b1-48c9-9bf8-bcc60fb9ab7c</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.4.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.3.0" />
+    <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.0-preview.1.25127.4" />
+    <PackageReference Include="Microsoft.ML.Tokenizers.Data.O200kBase" Version="1.0.2" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.42.0-preview" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.42.0" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    <PackageReference Include="OpenAI" Version="2.2.0-beta.4" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.3.0-preview.1.25161.3" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="9.3.0-preview.1.25161.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Havensread.Data\Havensread.Data.csproj" />
+    <ProjectReference Include="..\Havensread.Connector\Havensread.Connector.csproj" />
+  </ItemGroup>
+</Project>

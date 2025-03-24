@@ -54,7 +54,8 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    .AddMeter("Experimental.Microsoft.Extensions.AI");
             })
             .WithTracing(tracing =>
             {
@@ -62,7 +63,9 @@ public static class Extensions
                     .AddAspNetCoreInstrumentation()
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddSource("Experimental.Microsoft.Extensions.AI")
+                    .AddSource("Ingestion");
             });
 
         builder.AddOpenTelemetryExporters();
@@ -116,4 +119,15 @@ public static class Extensions
 
         return app;
     }
+
+    public static IHostApplicationBuilder AddVectorStore(this IHostApplicationBuilder builder)
+    {
+        //builder.Services.AddSingleton<IVectorStore, QdrantVectorStore>();
+        builder.AddQdrantClient("havensread-vectordb", o =>
+        {
+        });
+
+        return builder;
+    }
+
 }

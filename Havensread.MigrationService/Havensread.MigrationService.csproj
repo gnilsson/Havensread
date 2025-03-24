@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -10,11 +10,13 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Havensread.DataIngestor\Havensread.DataIngestor.csproj" />
+    <ProjectReference Include="..\Havensread.DataIngestor\Havensread.VerticalDataIngestor.csproj" />
     <ProjectReference Include="..\Havensread.Data\Havensread.Data.csproj" />
+    <PackageReference Include="Aspire.Qdrant.Client" Version="9.1.0" />
     <ProjectReference Include="..\Havensread.ServiceDefaults\Havensread.ServiceDefaults.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
       <PrivateAssets>all</PrivateAssets>

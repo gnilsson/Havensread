@@ -2,6 +2,13 @@
 
 public static class PathUtils
 {
+    static PathUtils()
+    {
+        SolutionDirectory = FindAncestorDirectoryContaining("*.sln");
+    }
+
+    public static string SolutionDirectory { get; }
+
     public static string FindAncestorDirectoryContaining(string pattern)
     {
         var currentDir = Directory.GetCurrentDirectory();

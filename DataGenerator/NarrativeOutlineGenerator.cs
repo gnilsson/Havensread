@@ -23,8 +23,7 @@ public sealed class NarrativeOutlineGenerator : GeneratorBase<NarrativeOutline>
     {
         if (Directory.GetFiles(OutputDirPath).Length > 0) yield break;
 
-        var solutionDir = PathUtils.FindAncestorDirectoryContaining("*.sln");
-        var promptPath = Path.Combine(solutionDir, "DataGenerator", "prompts", "narrativeOutlinePrompt.txt");
+        var promptPath = Path.Combine(PathUtils.SolutionDirectory, "DataGenerator", "prompts", "narrativeOutlinePrompt.txt");
 
         for (int i = 0; i < 5; i++)
         {

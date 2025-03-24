@@ -1,0 +1,92 @@
+﻿@page "/dashboard"
+
+@using Havensread.Connector
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+
+<PageTitle>Dashboard</PageTitle>
+
+<button @onclick="StartWorkers">Start Workers</button>
+<button @onclick="StopCoordinator">Stop Coordinator</button>
+
+<table>
+    <thead>
+        <tr>
+            <th>Worker Name</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* @foreach (var worker in workerStatuses)
+        {
+            <tr>
+                <td>@worker.Name</td>
+                <td>@worker.Status</td>
+            </tr>
+        } *@
+    </tbody>
+</table>
+
+@code {
+    private HubConnection? _hubConnection;
+    //private List<WorkerStatus> workerStatuses = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:8114/workerHub")
+            .Build();
+
+        // hubConnection.On<IEnumerable<WorkerStatus>>("ReceiveWorkerStatuses", (statuses) =>
+        // {
+        //     workerStatuses = statuses.ToList();
+        //     StateHasChanged();
+        // });
+
+        await _hubConnection.StartAsync();
+
+        _hubConnection.On("StopAsync", () =>
+  Coordinator      {
+            //Console.WriteLine(message);
+        });
+
+        //await LoadWorkerStatuses();
+    }
+
+    private async Task StopCoordinator()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.InvokeAsync(WorkerHub.MethodName.Stop);
+            //await LoadWorkerStatuses();
+        }
+    }
+
+    private async Task StartWorkers()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.InvokeAsync(WorkerHub.MethodName.StartWorkers);
+            //await LoadWorkerStatuses();
+        }
+    }
+
+    // private async Task LoadWorkerStatuses()
+    // {
+    //     if (hubConnection is not null)
+    //     {
+    //         var statuses = await hubConnection.InvokeAsync<IEnumerable<WorkerStatus>>("GetWorkerStatuses");
+    //         workerStatuses = statuses.ToList();
+    //     }
+    // }
+
+    public bool IsConnected => _hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+   }
