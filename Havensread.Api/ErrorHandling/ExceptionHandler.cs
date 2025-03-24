@@ -31,7 +31,8 @@ internal sealed class ExceptionHandler
             {
                 StatusMessage = "Client Closed Request",
                 Information = "The process was dropped due to a cancellation request."
-            });
+            }).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            return;
         });
 
         if (await HandleResponseAlreadyStartedAsync(httpContext, exHandlerFeature)) return;
@@ -44,7 +45,7 @@ internal sealed class ExceptionHandler
             {
                 StatusMessage = "Bad Request",
                 Information = "The request was malformed."
-            });
+            }).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
             return;
         }
 
@@ -56,7 +57,7 @@ internal sealed class ExceptionHandler
             {
                 StatusMessage = "Conflict",
                 Information = "The resource was modified by another request."
-            });
+            }).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
             return;
         }
 
@@ -73,46 +74,42 @@ internal sealed class ExceptionHandler
             Information = "Unexpected error occured internally.",
         };
 
-        await httpContext.Response.WriteAsJsonAsync(errorResponse);
+        await httpContext.Response.WriteAsJsonAsync(errorResponse).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 
-        var http = exHandlerFeature.Endpoint?.DisplayName?.Split(" => ")[0];
+        var endpoint = exHandlerFeature.Endpoint?.DisplayName?.Split(" => ")[0];
         var type = exHandlerFeature.Error.GetType().Name;
         var error = exHandlerFeature.Error.Message;
 
         const string Message = """
             ================================
-            {Http}
+            Endpoint: {Endpoint}
             TYPE: {Type}
             REASON: {Error}
             INNER REASON: {Inner}
             ---------------------------------Outer
-            {StackTrace},
+            {StackTrace}
             ---------------------------------Inner
             {InnerStrackTrace}
             ================================
             """;
 
-        _logger.LogError(exHandlerFeature.Error, Message, http, type, error, exHandlerFeature.Error.StackTrace, exHandlerFeature.Error.InnerException?.Message, exHandlerFeature.Error.InnerException?.StackTrace);
+        _logger.LogError(exHandlerFeature.Error, Message, endpoint, type, error, exHandlerFeature.Error.StackTrace, exHandlerFeature.Error.InnerException?.Message, exHandlerFeature.Error.InnerException?.StackTrace);
     }
 
     private async Task<bool> HandleResponseAlreadyStartedAsync(HttpContext httpContext, IExceptionHandlerFeature exHandlerFeature)
     {
-        if (httpContext.Response.HasStarted)
+        if (!httpContext.Response.HasStarted) return false;
+
+        _logger.LogError(exHandlerFeature.Error, "The response has already started, the response will not be executed properly.");
+
+        try
         {
-            _logger.LogError(exHandlerFeature.Error, "The response has already started, the exception handler will not be executed.");
-
-            try
-            {
-                await httpContext.Response.CompleteAsync();
-            }
-            catch (Exception e)
-            {
-                _logger.LogCritical(e, "An error occured while completing the response.");
-            }
-
-            return true;
+            await httpContext.Response.CompleteAsync();
         }
-
-        return false;
+        catch (Exception e)
+        {
+            _logger.LogCritical(e, "An error occured while completing the response.");
+        }
+        return true;
     }
 }

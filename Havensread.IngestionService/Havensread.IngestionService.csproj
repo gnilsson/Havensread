@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.4.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.3.0" />
@@ -23,5 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Havensread.Data\Havensread.Data.csproj" />
+    <ProjectReference Include="..\Havensread.Connector\Havensread.Connector.csproj" />
   </ItemGroup>
 </Project>

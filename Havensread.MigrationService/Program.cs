@@ -8,14 +8,14 @@ builder.AddServiceDefaults();
 
 builder.AddVectorStore();
 
-builder.Services.AddSingleton<AppWorker>();
-builder.Services.AddSingleton<IngestionWorker>();
-builder.Services.AddHostedService<WorkerCoordinator>();
+builder.Services.AddSingleton<AppMigrationWorker>();
+builder.Services.AddSingleton<IngestionMigrationWorker>();
+builder.Services.AddHostedService<MigrationWorkerCoordinator>();
 
 builder.Services
     .AddOpenTelemetry()
-    .WithTracing(tracing => tracing.AddSource(AppWorker.ActivitySourceName))
-    .WithTracing(tracing => tracing.AddSource(IngestionWorker.ActivitySourceName));
+    .WithTracing(tracing => tracing.AddSource(AppMigrationWorker.ActivitySourceName))
+    .WithTracing(tracing => tracing.AddSource(IngestionMigrationWorker.ActivitySourceName));
 
 builder.AddDatabase();
 

@@ -1,10 +1,10 @@
-﻿using Havensread.IngestionService.Apis;
+﻿using Havensread.Connector;
+using Havensread.IngestionService.Apis;
+using Havensread.IngestionService.Workers;
 using Havensread.ServiceDefaults;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.VectorData;
 using OpenAI;
 using Polly;
-using Qdrant.Client;
 using System.ClientModel;
 using System.Net;
 using System.Net.Http.Headers;
@@ -13,10 +13,25 @@ namespace Havensread.IngestionService;
 
 public static class ApplicationInitializationExtensions
 {
-    public static IServiceCollection AddIngestionPipeline(this IServiceCollection services)
+    public static IServiceCollection AddIngestionWorkers(this IServiceCollection services)
     {
+        // get an enumerable of all classes inheriting from IWorker
+        var workerTypes = typeof(ApplicationInitializationExtensions).Assembly
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && typeof(IWorker).IsAssignableFrom(t));
+
+        foreach (var workerType in workerTypes)
+        {
+            services.AddSingleton(typeof(IWorker), workerType);
+        }
+
+        services.AddSingleton<WorkerCoordinator>();
+        services.AddSingleton<IWorkerCoordinator>(sp => sp.GetRequiredService<WorkerCoordinator>());
+        services.AddHostedService<WorkerCoordinator>(sp => sp.GetRequiredService<WorkerCoordinator>());
+        //services.AddHostedService<TestB>();
+
         services.AddScoped<BookIngestionDataCollector>();
-        //services.AddHostedService<IngestionBackgroundService>();
+
         return services;
     }
 

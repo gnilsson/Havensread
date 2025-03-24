@@ -20,8 +20,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Havensread.Api\Havensread.Api.csproj" />
     <ProjectReference Include="..\Havensread.Data\Havensread.Data.csproj" />
+    <ProjectReference Include="..\Havensread.IngestionService\Havensread.IngestionService.csproj" />
     <ProjectReference Include="..\Havensread.MigrationService\Havensread.MigrationService.csproj" />
-    <ProjectReference Include="..\Havensread.Web\Havensread.Web\Havensread.Web.csproj" />
+    <ProjectReference Include="..\Havensread.Web\Havensread.Web.csproj" />
   </ItemGroup>
 
 </Project>

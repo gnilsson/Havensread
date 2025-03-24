@@ -14,15 +14,15 @@ builder.AddDatabase();
 
 builder.AddVectorStore();
 
-builder.AddAIServices();
+//builder.AddAIServices();
 
-builder.AddHttpClients();
+//builder.AddHttpClients();
 
 builder.Services.AddScoped<ExceptionHandler>();
 
 builder.Services.AddEndpoints();
 
-builder.Services.AddIngestionPipeline();
+//builder.Services.AddIngestionPipeline();
 
 builder.Services.AddOpenApi();
 
@@ -44,5 +44,6 @@ app.UseMiddlewares();
 
 app.UseHttpsRedirection();
 
+//app.MapHub
 
 app.Run();

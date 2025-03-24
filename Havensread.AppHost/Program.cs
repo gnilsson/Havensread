@@ -32,6 +32,15 @@ var api = builder
     .WaitFor(migrations)
     .WithReference(vectorDb);
 
+var ingestion = builder
+    .AddProject<Projects.Havensread_IngestionService>("ingestion")
+    .WithReference(appDb)
+    .WaitFor(appDb)
+    .WithReference(ingDb)
+    .WaitFor(ingDb)
+    .WithReference(vectorDb)
+    .WaitFor(vectorDb);
+
 var web = builder
     .AddProject<Projects.Havensread_Web>("havensread-web")
     .WithReference(appDb)

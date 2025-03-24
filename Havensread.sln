@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.AppHost", "Haven
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.ServiceDefaults", "Havensread.ServiceDefaults\Havensread.ServiceDefaults.csproj", "{8BEA73ED-0B14-46E9-AA87-CFB7F692E112}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.Web", "Havensread.Web\Havensread.Web\Havensread.Web.csproj", "{24BE0DA9-747C-6CB9-6B78-62F568DA45CB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.Api", "Havensread.Api\Havensread.Api.csproj", "{AE0BA47B-79DB-E9C0-4A02-2862627B0843}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "seeddata", "seeddata", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
@@ -20,13 +18,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.DataIngestor", "Havensread.DataIngestor\Havensread.DataIngestor.csproj", "{DB17FABE-ECFD-4362-83B0-EB92F2E9975A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.VerticalDataIngestor", "Havensread.DataIngestor\Havensread.VerticalDataIngestor.csproj", "{DB17FABE-ECFD-4362-83B0-EB92F2E9975A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.Data", "Havensread.Data\Havensread.Data.csproj", "{89C585D2-A159-4B6F-879D-82E8AAF14A55}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.MigrationService", "Havensread.MigrationService\Havensread.MigrationService.csproj", "{51BF9558-2E9F-4072-985E-3E16DA492595}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.IngestionService", "Havensread.IngestionService\Havensread.IngestionService.csproj", "{0759033D-A54B-40E4-8483-6A005565CF11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.Web", "Havensread.Web\Havensread.Web.csproj", "{EF51BB66-9548-4155-95C9-C588722867EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Havensread.Connector", "Havensread.Connector\Havensread.Connector.csproj", "{A39FE4B7-BC6E-4380-BE03-A14F5839B4F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,10 +44,6 @@ Global
 		{8BEA73ED-0B14-46E9-AA87-CFB7F692E112}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BEA73ED-0B14-46E9-AA87-CFB7F692E112}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BEA73ED-0B14-46E9-AA87-CFB7F692E112}.Release|Any CPU.Build.0 = Release|Any CPU
-		{24BE0DA9-747C-6CB9-6B78-62F568DA45CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{24BE0DA9-747C-6CB9-6B78-62F568DA45CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{24BE0DA9-747C-6CB9-6B78-62F568DA45CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{24BE0DA9-747C-6CB9-6B78-62F568DA45CB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AE0BA47B-79DB-E9C0-4A02-2862627B0843}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AE0BA47B-79DB-E9C0-4A02-2862627B0843}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE0BA47B-79DB-E9C0-4A02-2862627B0843}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -70,6 +68,14 @@ Global
 		{0759033D-A54B-40E4-8483-6A005565CF11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0759033D-A54B-40E4-8483-6A005565CF11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0759033D-A54B-40E4-8483-6A005565CF11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF51BB66-9548-4155-95C9-C588722867EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF51BB66-9548-4155-95C9-C588722867EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF51BB66-9548-4155-95C9-C588722867EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF51BB66-9548-4155-95C9-C588722867EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A39FE4B7-BC6E-4380-BE03-A14F5839B4F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A39FE4B7-BC6E-4380-BE03-A14F5839B4F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A39FE4B7-BC6E-4380-BE03-A14F5839B4F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A39FE4B7-BC6E-4380-BE03-A14F5839B4F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

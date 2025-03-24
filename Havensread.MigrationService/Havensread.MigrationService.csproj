@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Havensread.DataIngestor\Havensread.DataIngestor.csproj" />
+    <ProjectReference Include="..\Havensread.DataIngestor\Havensread.VerticalDataIngestor.csproj" />
     <ProjectReference Include="..\Havensread.Data\Havensread.Data.csproj" />
     <PackageReference Include="Aspire.Qdrant.Client" Version="9.1.0" />
     <ProjectReference Include="..\Havensread.ServiceDefaults\Havensread.ServiceDefaults.csproj" />
