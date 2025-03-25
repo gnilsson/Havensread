@@ -1,4 +1,4 @@
-﻿using Havensread.Connector._WorkerCoordinator;
+﻿using Havensread.Connector;
 using Havensread.IngestionService.Apis;
 using Havensread.IngestionService.Workers;
 using Havensread.ServiceDefaults;

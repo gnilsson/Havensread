@@ -1,19 +1,11 @@
-﻿using Havensread.Connector;
-using Havensread.Data.App;
-using Havensread.Data.Ingestion;
-using Havensread.IngestionService.Workers;
+﻿using Havensread.Data.Ingestion;
 using Havensread.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Havensread.IngestionService.Workers;
 
@@ -80,75 +72,74 @@ internal sealed class IngestionWorker : IWorker
     }
 
 
-        //public async Task ExecuteAsync(CancellationToken stoppingToken)
-        //{
-        //    var requestBatch = new BookDataIngestor.Request[BatchSize];
-        //    var count = BatchSize;
+    //public async Task ExecuteAsync(CancellationToken stoppingToken)
+    //{
+    //    var requestBatch = new BookDataIngestor.Request[BatchSize];
+    //    var count = BatchSize;
 
-        //    while (!stoppingToken.IsCancellationRequested)
-        //    {
-        //        if (count == BatchSize)
-        //        {
-        //            requestBatch = await GetBookIngestionRequestsAsync().ToArrayAsync(stoppingToken);
+    //    while (!stoppingToken.IsCancellationRequested)
+    //    {
+    //        if (count == BatchSize)
+    //        {
+    //            requestBatch = await GetBookIngestionRequestsAsync().ToArrayAsync(stoppingToken);
 
-        //            if (requestBatch.Length == 0)
-        //            {
-        //                _logger.LogInformation("No books to ingest.");
-        //                break;
-        //            }
-        //            if (requestBatch.Length < BatchSize)
-        //            {
-        //                _logger.LogInformation("Less than {BatchSize} books to ingest.", BatchSize);
-        //            }
+    //            if (requestBatch.Length == 0)
+    //            {
+    //                _logger.LogInformation("No books to ingest.");
+    //                break;
+    //            }
+    //            if (requestBatch.Length < BatchSize)
+    //            {
+    //                _logger.LogInformation("Less than {BatchSize} books to ingest.", BatchSize);
+    //            }
 
-        //            count = 0;
-        //        }
+    //            count = 0;
+    //        }
 
-        //        var requests = requestBatch.Skip(count).Take(ChunkSize);
-        //        count += ChunkSize;
+    //        var requests = requestBatch.Skip(count).Take(ChunkSize);
+    //        count += ChunkSize;
 
-        //        using var activity = s_activitySource.StartActivity("Ingesting books", ActivityKind.Consumer);
+    //        using var activity = s_activitySource.StartActivity("Ingesting books", ActivityKind.Consumer);
 
-        //        await using var scope = _serviceProvider.CreateAsyncScope();
-        //        var handler = scope.ServiceProvider.GetRequiredService<BookDataIngestor>();
+    //        await using var scope = _serviceProvider.CreateAsyncScope();
+    //        var handler = scope.ServiceProvider.GetRequiredService<BookDataIngestor>();
 
-        //        try
-        //        {
-        //            var response = handler.ExecuteAsync(requests, stoppingToken);
+    //        try
+    //        {
+    //            var response = handler.ExecuteAsync(requests, stoppingToken);
 
-        //            await using var ingestionContext = scope.ServiceProvider.GetRequiredService<IngestionDbContext>();
+    //            await using var ingestionContext = scope.ServiceProvider.GetRequiredService<IngestionDbContext>();
 
-        //            var points = await CreatePointsAndIngestionDocumentsAsync(ingestionContext, response).ToArrayAsync(stoppingToken);
+    //            var points = await CreatePointsAndIngestionDocumentsAsync(ingestionContext, response).ToArrayAsync(stoppingToken);
 
-        //            await Task.WhenAll(_qdrantClient.UpsertAsync(SourceName.Books, points), ingestionContext.SaveChangesAsync());
+    //            await Task.WhenAll(_qdrantClient.UpsertAsync(SourceName.Books, points), ingestionContext.SaveChangesAsync());
 
 
-        //            // note:
-        //            // im not sure where to put this atm
-        //            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") is "Development")
-        //            {
-        //                await LocalStorageHelper.WriteToJsonDiskAsync(points, p => p.Id.Uuid, "points", CancellationToken.None);
-        //            }
+    //            // note:
+    //            // im not sure where to put this atm
+    //            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") is "Development")
+    //            {
+    //                await LocalStorageHelper.WriteToJsonDiskAsync(points, p => p.Id.Uuid, "points", CancellationToken.None);
+    //            }
 
-        //            // note:
-        //            // my next goal is to figure out how I get additional data such as genres in to the app db
-        //            // i want a nice ass pipeline
-        //            // .. gotta figure that out
+    //            // note:
+    //            // my next goal is to figure out how I get additional data such as genres in to the app db
+    //            // i want a nice ass pipeline
+    //            // .. gotta figure that out
 
-        //            // and then we start collecting some data
-        //            // try to build a recommendation system from that data
-        //            // or anything I can imagine... will be fun
+    //            // and then we start collecting some data
+    //            // try to build a recommendation system from that data
+    //            // or anything I can imagine... will be fun
 
-        //            // google api is max 100 requests/day
-        //        }
-        //        catch (Exception e) when (e is not OperationCanceledException)
-        //        {
-        //            // might have reached request limit
-        //            activity?.AddException(e); // move?
-        //            throw;
-        //        }
-        //    }
-    }
+    //            // google api is max 100 requests/day
+    //        }
+    //        catch (Exception e) when (e is not OperationCanceledException)
+    //        {
+    //            // might have reached request limit
+    //            activity?.AddException(e); // move?
+    //            throw;
+    //        }
+    //    }
 
     private async IAsyncEnumerable<PointStruct> CreatePointsAndIngestionDocumentsAsync(
         IngestionDbContext ingestionContext,
@@ -207,28 +198,28 @@ internal sealed class IngestionWorker : IWorker
         }
     }
 
-    private async IAsyncEnumerable<BookDataIngestor.Request> GetBookIngestionRequestsAsync()
-    {
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        await using var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await using var ingestionDbContext = scope.ServiceProvider.GetRequiredService<IngestionDbContext>();
+    //private async IAsyncEnumerable<BookDataIngestor.Request> GetBookIngestionRequestsAsync()
+    //{
+    //    await using var scope = _serviceProvider.CreateAsyncScope();
+    //    await using var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    //    await using var ingestionDbContext = scope.ServiceProvider.GetRequiredService<IngestionDbContext>();
 
-        var ingestedBookIds = await ingestionDbContext.Documents
-            .AsNoTracking()
-            .Where(x => x.Source == nameof(BookDataIngestor) && x.Version == 0)
-            .Select(x => x.Id)
-            .ToArrayAsync();
+    //    var ingestedBookIds = await ingestionDbContext.Documents
+    //        .AsNoTracking()
+    //        .Where(x => x.Source == nameof(BookDataIngestor) && x.Version == 0)
+    //        .Select(x => x.Id)
+    //        .ToArrayAsync();
 
-        var books = appDbContext.Books
-            .AsNoTracking()
-            .Where(x => !ingestedBookIds.Contains(x.Id))
-            .Take(BatchSize)
-            .Select(x => new BookDataIngestor.Request(x.Id, x.Title, x.ISBN))
-            .AsAsyncEnumerable();
+    //    var books = appDbContext.Books
+    //        .AsNoTracking()
+    //        .Where(x => !ingestedBookIds.Contains(x.Id))
+    //        .Take(WorkerDefaults.BatchSize)
+    //        .Select(x => new BookDataIngestor.Request(x.Id, x.Title, x.ISBN))
+    //        .AsAsyncEnumerable();
 
-        await foreach (var book in books)
-        {
-            yield return book;
-        }
-    }
+    //    await foreach (var book in books)
+    //    {
+    //        yield return book;
+    //    }
+    //}
 }
