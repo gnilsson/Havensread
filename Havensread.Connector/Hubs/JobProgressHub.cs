@@ -1,5 +1,4 @@
-﻿using MassTransit;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 
 namespace Havensread.Connector;
 
@@ -16,10 +15,5 @@ public sealed class JobProgressHub : Hub
     }
 
 
-
-}
-
-public sealed class ProcessingCommandConsumer : IConsumer
-{
 
 }

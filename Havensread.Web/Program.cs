@@ -1,17 +1,27 @@
 using Havensread.Connector;
 using Havensread.Web.Components;
-using Havensread.IngestionService.Workers;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddSignalR();
 
-//builder.Services.AddSingleton<WorkerCoordinator>();
-//builder.Services.AddSingleton<IWorkerCoordinator>(sp => sp.GetRequiredService<WorkerCoordinator>());
+builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
 
+builder.Services.AddMassTransit(x =>
+{
+    x.SetKebabCaseEndpointNameFormatter();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var configuration = context.GetRequiredService<IConfiguration>();
+        var connection = configuration.GetConnectionString("havensread-rabbitmq");
+        cfg.Host(connection);
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 

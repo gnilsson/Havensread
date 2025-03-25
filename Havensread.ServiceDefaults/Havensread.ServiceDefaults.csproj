@@ -18,6 +18,13 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.11.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.1" />
     <PackageReference Include="Aspire.Qdrant.Client" Version="9.1.0" />
+    <!--<PackageReference Include="Aspire.RabbitMQ.Client" Version="9.1.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />-->
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Havensread.Connector\Havensread.Connector.csproj" />
   </ItemGroup>
 
 </Project>

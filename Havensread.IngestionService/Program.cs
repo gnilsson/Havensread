@@ -4,6 +4,7 @@ using Havensread.IngestionService.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using Havensread.Connector;
+using Havensread.Connector.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,34 +16,27 @@ builder.AddAIServices();
 
 builder.AddHttpClients();
 
-builder.Services.AddIngestionWorkers();
+builder.Services.AddWorkers();
 
-builder.Services
-    .AddOpenTelemetry()
-    .WithTracing(tracing => tracing.AddSource(nameof(IngestionWorker)));
-
-
-// Add SignalR
 builder.Services.AddSignalR();
 
-// Configure MassTransit with RabbitMQ using Aspire's configuration
-//builder.Services.AddMassTransit(x =>
-//{
-//    x.AddConsumer<ProcessingCommandConsumer>();
+builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
 
-//    x.UsingRabbitMq((context, cfg) =>
-//    {
-//        // Uses configuration from Aspire
-//        cfg.Host(builder.Configuration.GetConnectionString("rabbitmq"));
+builder.Services.AddMassTransit(x =>
+{
+    x.SetKebabCaseEndpointNameFormatter();
+    x.AddConsumer<WorkerCommandConsumer>();
 
-//        cfg.ReceiveEndpoint("processing-queue", e =>
-//        {
-//            e.ConfigureConsumer<ProcessingCommandConsumer>(context);
-//        });
-//    });
-//});
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var configuration = context.GetRequiredService<IConfiguration>();
+        var connection = configuration.GetConnectionString("havensread-rabbitmq");
+        cfg.Host(connection);
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
-app.MapHub<JobProgressHub>("/jobprogresshub");
+//app.MapHub<JobProgressHub>("/jobprogresshub");
 app.MapHub<WorkerHub>("/workerHub");
 app.Run();

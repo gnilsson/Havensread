@@ -15,11 +15,11 @@
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.1.0" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.1.0" />
     <PackageReference Include="Aspire.Hosting.Qdrant" Version="9.1.0" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="9.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Havensread.Api\Havensread.Api.csproj" />
-    <ProjectReference Include="..\Havensread.Data\Havensread.Data.csproj" />
     <ProjectReference Include="..\Havensread.IngestionService\Havensread.IngestionService.csproj" />
     <ProjectReference Include="..\Havensread.MigrationService\Havensread.MigrationService.csproj" />
     <ProjectReference Include="..\Havensread.Web\Havensread.Web.csproj" />

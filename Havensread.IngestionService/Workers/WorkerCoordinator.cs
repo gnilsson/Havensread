@@ -5,12 +5,6 @@ namespace Havensread.IngestionService.Workers;
 
 public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
 {
-    private enum WorkerState
-    {
-        Running,
-        Stopped,
-    }
-
     private readonly IEnumerable<IWorker> _workers;
     private readonly IHostApplicationLifetime _hostApplicationLifetime;
     private readonly ILogger<WorkerCoordinator> _logger;
@@ -19,7 +13,7 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
     private TaskCompletionSource _startTcs;
 
     // Delegate to start a worker with the global token
-    private Func<string, CancellationToken, Task<bool>>? _startWorkerDelegate;
+    private Func<string, CancellationToken, bool>? _startWorkerDelegate;
 
     public WorkerCoordinator(
         IEnumerable<IWorker> workers,
@@ -29,10 +23,12 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
         _workers = workers;
         _hostApplicationLifetime = hostApplicationLifetime;
         _logger = logger;
+
         _workerCts = new ConcurrentDictionary<string, CancellationTokenSource>(
             _workers.ToDictionary(workers => workers.Name, _ => new CancellationTokenSource()));
         _workerStates = new ConcurrentDictionary<string, WorkerState>(
             _workers.ToDictionary(workers => workers.Name, _ => WorkerState.Stopped));
+
         _startTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
@@ -57,6 +53,7 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            // Using the completion source to wait for input
             await _startTcs.Task;
 
             _startTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -68,7 +65,6 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
             await Task.WhenAll(tasks);
         }
     }
-
 
     public bool StopWorker(string workerName)
     {
@@ -82,7 +78,7 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
         return false;
     }
 
-    public Task<bool> StartWorkerAsync(string workerName, CancellationToken workerToken)
+    public bool StartWorker(string workerName, CancellationToken workerToken)
     {
         ArgumentNullException.ThrowIfNull(_startWorkerDelegate, nameof(_startWorkerDelegate));
 
@@ -110,9 +106,12 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
 
         using var lts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, workerToken.Value);
 
+        // Add activity source?
+
         lts.Token.Register(() =>
         {
             _logger.LogInformation("Worker {WorkerName} was cancelled.", worker.Name);
+            _workerStates[worker.Name] = WorkerState.Stopping;
             // Callback to canceller?
         });
 
@@ -127,7 +126,6 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while executing worker {WorkerName}.", worker.Name);
-            // Manual restart required
         }
         finally
         {
@@ -137,9 +135,9 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
         }
     }
 
-    private Func<string, CancellationToken, Task<bool>> CreateStartWorkerDelegate(CancellationToken stoppingToken)
+    private Func<string, CancellationToken, bool> CreateStartWorkerDelegate(CancellationToken stoppingToken)
     {
-        return async (workerName, workerToken) =>
+        return (workerName, workerToken) =>
         {
             var worker = _workers.FirstOrDefault(w => w.Name == workerName);
             if (worker is null)
@@ -154,17 +152,35 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
                 return false;
             }
 
-            if (workerToken == stoppingToken || workerToken == CancellationToken.None)
+            CancellationToken? validWorkerToken = null;
+            if (workerToken != stoppingToken && workerToken != CancellationToken.None)
             {
-                await ExecuteWorkerAsync(worker, stoppingToken);
-                return false;
+                // Worker token is valid, we wrap it in a token source so that we can keep it
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(workerToken, CancellationToken.None);
+                _workerCts[workerName] = cts;
+                validWorkerToken = cts.Token;
             }
 
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(workerToken, CancellationToken.None);
-            _workerCts[workerName] = cts;
+            _ = Task.Run(async () =>
+            {
+                await ExecuteWorkerAsync(worker, stoppingToken, validWorkerToken);
+            });
 
-            await ExecuteWorkerAsync(worker, stoppingToken, cts.Token);
             return true;
         };
+    }
+
+    public WorkerState GetWorkerState(string workerName)
+    {
+        var worker = _workers.First(w => w.Name == workerName);
+        return _workerStates[worker.Name];
+    }
+
+    public IEnumerable<WorkerState> GetWorkerStates()
+    {
+        foreach (var state in _workerStates.Values)
+        {
+            yield return state;
+        }
     }
 }

@@ -1,22 +1,20 @@
-﻿using MassTransit;
+﻿using Havensread.Connector;
 using Microsoft.AspNetCore.SignalR;
+using System.Threading.Tasks;
 
 namespace Havensread.Connector;
 
-public interface IWorkerHub
-{
-    Task StartWorkersAsync();
-    Task StopCoordinatorAsync();
-}
-
 public sealed class WorkerHub : Hub<IWorkerHub>
 {
-    public sealed class MethodName
+    private readonly record struct WorkerOperation(string WorkerName, string Operation, bool Result);
+
+    public sealed class ServerMethodName
     {
-        public const string StartWorkers = nameof(StartWorkersAsync);
-        public const string Stop = nameof(StopCoordinatorAsync);
-
-
+        public const string StartWorkers = nameof(WorkerHub.StartWorkersAsync);
+        public const string StartWorker = nameof(WorkerHub.StartWorkerAsync);
+        public const string StopWorker = nameof(WorkerHub.StopWorker);
+        public const string StopCoordinator = nameof(WorkerHub.StopCoordinatorAsync);
+        public const string GetWorkerStates = nameof(WorkerHub.GetWorkerStates);
     }
 
     private readonly IWorkerCoordinator _workerCoordinator;
@@ -28,17 +26,31 @@ public sealed class WorkerHub : Hub<IWorkerHub>
 
     public async Task StartWorkersAsync()
     {
-        _workerCoordinator.StartWorkers();
+        var result = _workerCoordinator.StartWorkers();
+        await Clients.Caller.SendResultAsync(result);
+    }
 
-        //Clients.All.
-        //await Clients.All..SendAsync("ReceiveStatus", "Started workers");
+    public async Task StartWorkerAsync(string workerName)
+    {
+        var result = _workerCoordinator.StartWorker(workerName);
+        await Clients.Caller.SendResultAsync(result);
+    }
+
+    public async Task StopWorker(string workerName)
+    {
+        var result = _workerCoordinator.StopWorker(workerName);
+        await Clients.Caller.SendResultAsync(result);
     }
 
     public async Task StopCoordinatorAsync()
     {
         Context.Abort();
         await _workerCoordinator.StopCoordinatorAsync();
+    }
 
-        //await Clients.All.SendAsync("ReceiveStatus", "Stopped workers");
+    public async Task GetWorkerStates()
+    {
+        var workerStates = _workerCoordinator.GetWorkerStates();
+        //await Clients.Caller.SendResultAsync(workerStates);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Havensread.Connector;
+﻿using Havensread.Connector._WorkerCoordinator;
 using Havensread.IngestionService.Apis;
 using Havensread.IngestionService.Workers;
 using Havensread.ServiceDefaults;
@@ -13,24 +13,25 @@ namespace Havensread.IngestionService;
 
 public static class ApplicationInitializationExtensions
 {
-    public static IServiceCollection AddIngestionWorkers(this IServiceCollection services)
+    public static IServiceCollection AddWorkers(this IServiceCollection services)
     {
-        // get an enumerable of all classes inheriting from IWorker
-        var workerTypes = typeof(ApplicationInitializationExtensions).Assembly
+        var workerTypes = typeof(Program).Assembly
             .GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && typeof(IWorker).IsAssignableFrom(t));
+
+        var otelBuilder = services.AddOpenTelemetry();
 
         foreach (var workerType in workerTypes)
         {
             services.AddSingleton(typeof(IWorker), workerType);
+            otelBuilder.WithTracing(tracing => tracing.AddSource(workerType.Name));
         }
 
         services.AddSingleton<WorkerCoordinator>();
         services.AddSingleton<IWorkerCoordinator>(sp => sp.GetRequiredService<WorkerCoordinator>());
         services.AddHostedService<WorkerCoordinator>(sp => sp.GetRequiredService<WorkerCoordinator>());
-        //services.AddHostedService<TestB>();
 
-        services.AddScoped<BookIngestionDataCollector>();
+        services.AddScoped<BookDataIngestor>();
 
         return services;
     }
@@ -59,7 +60,6 @@ public static class ApplicationInitializationExtensions
 
         return builder;
     }
-
 
     public static IHostApplicationBuilder AddHttpClients(this IHostApplicationBuilder builder)
     {
