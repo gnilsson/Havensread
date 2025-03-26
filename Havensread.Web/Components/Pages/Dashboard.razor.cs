@@ -42,8 +42,6 @@ public partial class Dashboard
 
     private async Task StartWorkers()
     {
-        // note:
-        // there seems to be a mysterious bug that causes the signalr connection to temporarily crash when a worker crashes? hmmmm
         if (_hubConnection is not null)
         {
             await _hubConnection.InvokeAsync(WorkerHub.ServerMethodName.StartWorkers);

@@ -9,12 +9,13 @@ namespace Havensread.IngestionService.Workers.Book;
 public sealed class BookRequestGenerator
 {
     private readonly static Channel<IEnumerable<BookIngestionHandler.Request>> s_channel =
-        Channel.CreateBounded<IEnumerable<BookIngestionHandler.Request>>(new BoundedChannelOptions(WorkerDefaults.QueueSize)
+        Channel.CreateBounded<IEnumerable<BookIngestionHandler.Request>>(new BoundedChannelOptions(1)
         {
             FullMode = BoundedChannelFullMode.Wait,
         });
     private readonly static List<IEnumerable<BookIngestionHandler.Request>> s_requests = new(WorkerDefaults.BatchSize);
     private readonly IServiceProvider _serviceProvider;
+    private int _iteration = 0;
 
     public BookRequestGenerator(IServiceProvider serviceProvider)
     {
@@ -31,25 +32,27 @@ public sealed class BookRequestGenerator
 
     public async Task BeginWritingProcessAsync(CancellationToken cancellationToken)
     {
-        var iteration = WorkerDefaults.BatchSize / WorkerDefaults.ChunkSize;
-
         while (!cancellationToken.IsCancellationRequested)
         {
-            if (iteration * WorkerDefaults.ChunkSize == WorkerDefaults.BatchSize)
+            if (s_requests.Count == 0)
             {
-                iteration = 0;
+                _iteration = 0;
 
                 var requestsBatch = await GetBookRequestsAsync().ToArrayAsync();
 
-                s_requests.Clear();
                 s_requests.AddRange(requestsBatch.Chunk(WorkerDefaults.ChunkSize));
             }
 
-            var requestsChunk = s_requests.Skip(iteration).First();
+            var requestsChunk = s_requests.Skip(_iteration).First();
 
             await s_channel.Writer.WriteAsync(requestsChunk, cancellationToken);
 
-            iteration++;
+            _iteration++;
+
+            if (_iteration * WorkerDefaults.ChunkSize == WorkerDefaults.BatchSize)
+            {
+                s_requests.Clear();
+            }
         }
     }
 

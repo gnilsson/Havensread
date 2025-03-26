@@ -112,6 +112,7 @@ public static class ApplicationInitializationExtensions
             options.Retry.UseJitter = true;
             options.AttemptTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(10) };
             options.TotalRequestTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(30) };
+            options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(20);
         });
 
         return services;
