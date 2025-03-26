@@ -8,20 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddSignalR();
 
-builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
+//builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
 
-builder.Services.AddMassTransit(x =>
-{
-    x.SetKebabCaseEndpointNameFormatter();
+//builder.Services.AddMassTransit(x =>
+//{
+//    x.SetKebabCaseEndpointNameFormatter();
 
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        var configuration = context.GetRequiredService<IConfiguration>();
-        var connection = configuration.GetConnectionString("havensread-rabbitmq");
-        cfg.Host(connection);
-        cfg.ConfigureEndpoints(context);
-    });
-});
+//    x.UsingRabbitMq((context, cfg) =>
+//    {
+//        var configuration = context.GetRequiredService<IConfiguration>();
+//        var connection = configuration.GetConnectionString("havensread-rabbitmq");
+//        cfg.Host(connection);
+//        cfg.ConfigureEndpoints(context);
+//    });
+//});
 
 var app = builder.Build();
 
@@ -38,11 +38,11 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
-//app.MapStaticAssets();
-app.UseStaticFiles();
+app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
 app.MapHub<WorkerHub>("/workerHub");
 
 app.Run();

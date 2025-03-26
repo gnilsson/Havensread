@@ -1,5 +1,4 @@
 using Havensread.Connector;
-using Havensread.Connector._WorkerCoordinator;
 using Havensread.Connector.Messages;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -9,7 +8,6 @@ namespace Havensread.Web.Components.Pages;
 public partial class Dashboard
 {
     private HubConnection? _hubConnection;
-    private string _workerName = "IngestionWorker";
     //private List<WorkerStatus> workerStatuses = new();
 
     protected override async Task OnInitializedAsync()
@@ -34,16 +32,18 @@ public partial class Dashboard
         //await LoadWorkerStatuses();
     }
 
-    private async Task Send()
-    {
-        if (_hubConnection is not null)
-        {
-            await Bus.Publish(new WorkerMessage { WorkerName = WorkerNames.IngestionWorker });
-        }
-    }
+    //private async Task Send()
+    //{
+    //    if (_hubConnection is not null)
+    //    {
+    //        await Bus.Publish(new WorkerMessage { WorkerName = WorkerNames.BookIngestionWorker });
+    //    }
+    //}
 
     private async Task StartWorkers()
     {
+        // note:
+        // there seems to be a mysterious bug that causes the signalr connection to temporarily crash when a worker crashes? hmmmm
         if (_hubConnection is not null)
         {
             await _hubConnection.InvokeAsync(WorkerHub.ServerMethodName.StartWorkers);
@@ -63,7 +63,7 @@ public partial class Dashboard
     {
         if (_hubConnection is not null)
         {
-            await _hubConnection.InvokeAsync(WorkerHub.ServerMethodName.StartWorkers, workerName);
+            await _hubConnection.InvokeAsync(WorkerHub.ServerMethodName.StopWorker, workerName);
             //await LoadWorkerStatuses();
         }
     }

@@ -3,15 +3,14 @@ using Microsoft.Extensions.AI;
 using Microsoft.ML.Tokenizers;
 using Microsoft.SemanticKernel.Text;
 using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
-namespace Havensread.IngestionService;
+namespace Havensread.IngestionService.Workers.Book;
 
-public sealed class BookDataIngestor
+public sealed class BookIngestionHandler
 {
     public sealed record Request(Guid Id, string Title, string? ISBN);
 
@@ -49,13 +48,13 @@ public sealed class BookDataIngestor
         Complete,
         BadResult,
         BadQuery,
-        ErrorQuery,
+        Error,
     }
 
     private readonly HttpClient _jinaClient;
     private readonly HttpClient _googleClient;
     private readonly IChatClient _chatClient;
-    private readonly ILogger<BookDataIngestor> _logger;
+    private readonly ILogger<BookIngestionHandler> _logger;
     private readonly ChatOptions _chatOptions;
     private static readonly JsonSerializerOptions s_jsonSerializerOptions = new()
     {
@@ -87,13 +86,13 @@ public sealed class BookDataIngestor
         {1}
         """;
 
-    public BookDataIngestor(
+    public BookIngestionHandler(
         IHttpClientFactory httpClientFactory,
         IChatClient chatClient,
-        ILogger<BookDataIngestor> logger)
+        ILogger<BookIngestionHandler> logger)
     {
-        _jinaClient = httpClientFactory.CreateClient("jina-reader");
         _googleClient = httpClientFactory.CreateClient("book-searcher");
+        _jinaClient = httpClientFactory.CreateClient("jina-reader");
         _chatClient = chatClient;
         _logger = logger;
         _chatOptions = new ChatOptions
@@ -107,7 +106,7 @@ public sealed class BookDataIngestor
     // i should include book similarities, reviews
     // author notes? or is that perhaps a seperate process
     public async IAsyncEnumerable<Response> ExecuteAsync(
-        IEnumerable<Request> requests,
+        IAsyncEnumerable<Request> requests,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         List<Response> responses = [];
@@ -116,7 +115,7 @@ public sealed class BookDataIngestor
         {
             //Environment.ProcessorCount, with multiple workers this might become sketchy to parallelize
             // wonder if if i can derive a good number from processor count and active worker count
-            MaxDegreeOfParallelism = 1,
+            MaxDegreeOfParallelism = 3,
             CancellationToken = cancellationToken
         };
 
@@ -128,32 +127,33 @@ public sealed class BookDataIngestor
 
             if (searchItem is null)
             {
-                responses.Add(new Response { Id = request.Id, Title = request.Title, Status = Status.BadQuery });
+                responses.Add(new() { Id = request.Id, Title = request.Title, Status = Status.BadQuery });
                 return;
             }
 
             var content = await _jinaClient.GetStringAsync($"{_jinaClient.BaseAddress}{searchItem.Link}");
-
             var chunks = TextChunker.SplitPlainTextParagraphs([content], 8000, 1000, request.Title, text => _tokenizer.CountTokens(text));
 
             var prompt = string.Format(Prompt, request.Title, chunks[0]);
-            var response = await _chatClient.GetResponseAsync<BookInformation>(prompt, s_jsonSerializerOptions, _chatOptions, true, cancellationToken);
+            var response = await TryAsync(() =>
+                _chatClient.GetResponseAsync<BookInformation>(prompt, s_jsonSerializerOptions, _chatOptions, true, cancellationToken));
+            if (response.Error) return;
 
-            if (response.Result.Error)
+            if (response.Value.Result.Error)
             {
-                responses.Add(new Response { Id = request.Id, Title = request.Title, Status = Status.BadResult, SourceLink = searchItem.Link });
+                responses.Add(new() { Id = request.Id, Title = request.Title, Status = Status.BadResult, SourceLink = searchItem.Link });
                 return;
             }
 
-            responses.Add(new Response
+            responses.Add(new()
             {
                 Id = request.Id,
                 Status = Status.Complete,
                 Data = new()
                 {
-                    Synopsis = response.Result.Synopsis,
-                    Genres = response.Result.Genres,
-                    AuthorInformation = response.Result.AuthorInformation
+                    Synopsis = response.Value.Result.Synopsis,
+                    Genres = response.Value.Result.Genres,
+                    AuthorInformation = response.Value.Result.AuthorInformation
                 },
                 Title = request.Title,
                 SourceLink = searchItem.Link
@@ -163,6 +163,27 @@ public sealed class BookDataIngestor
         foreach (var response in responses)
         {
             yield return response;
+        }
+    }
+
+    public sealed class TryResult<T>
+    {
+        [MemberNotNullWhen(false, nameof(Value))]
+        public bool Error { get; init; }
+        public T? Value { get; init; }
+    }
+
+    public async Task<TryResult<T>> TryAsync<T>(Func<Task<T>> func)
+    {
+        try
+        {
+            var result = await func();
+            return new() { Value = result };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while executing function {Name}.", func.Method.Name);
+            return new() { Error = true };
         }
     }
 }

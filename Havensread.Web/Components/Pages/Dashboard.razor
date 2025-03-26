@@ -2,18 +2,18 @@
 
 @using Havensread.Connector
 @using Havensread.Connector.Messages
-@using MassTransit
+@* @using MassTransit *@
 @using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager Navigation
-@inject IBus Bus
+@* @inject IBus Bus *@
 
 <PageTitle>Dashboard</PageTitle>
 
 <button @onclick="StartWorkers">Start Workers</button>
 <button @onclick="StopCoordinator">Stop Coordinator</button>
-<button @onclick="() => StartWorker(_workerName)">Start Worker</button>
-<button @onclick="() => StopWorker(_workerName)">Stop Worker</button>
-<button @onclick="Send">Send</button>
+<button @onclick="() => StartWorker(WorkerNames.BookIngestionWorker)">Start Worker</button>
+<button @onclick="() => StopWorker(WorkerNames.BookIngestionWorker)">Stop Worker</button>
+@* <button @onclick="Send">Send</button> *@
 
 <table>
     <thead>

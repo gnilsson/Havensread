@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -27,5 +27,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Havensread.Data\Havensread.Data.csproj" />
     <ProjectReference Include="..\Havensread.Connector\Havensread.Connector.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Books\" />
   </ItemGroup>
 </Project>

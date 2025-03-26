@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Havensread.Connector._WorkerCoordinator;
+namespace Havensread.Connector;
 
 public sealed class WorkerNames
 {
-    public const string IngestionWorker = nameof(IngestionWorker);
+    public const string BookIngestionWorker = nameof(BookIngestionWorker);
 }

@@ -20,21 +20,21 @@ builder.Services.AddWorkers();
 
 builder.Services.AddSignalR();
 
-builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
+//builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
 
-builder.Services.AddMassTransit(x =>
-{
-    x.SetKebabCaseEndpointNameFormatter();
-    x.AddConsumer<WorkerCommandConsumer>();
+//builder.Services.AddMassTransit(x =>
+//{
+//    x.SetKebabCaseEndpointNameFormatter();
+//    x.AddConsumer<WorkerCommandConsumer>();
 
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        var configuration = context.GetRequiredService<IConfiguration>();
-        var connection = configuration.GetConnectionString("havensread-rabbitmq");
-        cfg.Host(connection);
-        cfg.ConfigureEndpoints(context);
-    });
-});
+//    x.UsingRabbitMq((context, cfg) =>
+//    {
+//        var configuration = context.GetRequiredService<IConfiguration>();
+//        var connection = configuration.GetConnectionString("havensread-rabbitmq");
+//        cfg.Host(connection);
+//        cfg.ConfigureEndpoints(context);
+//    });
+//});
 
 var app = builder.Build();
 //app.MapHub<JobProgressHub>("/jobprogresshub");

@@ -15,11 +15,11 @@ var vectorDb = builder
     .WithDataVolume()
     .WithLifetime(ContainerLifetime.Persistent);
 
-var rabbitmq = builder
-    .AddRabbitMQ("havensread-rabbitmq")
-    .WithManagementPlugin()
-    .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent);
+//var rabbitmq = builder
+//    .AddRabbitMQ("havensread-rabbitmq")
+//    .WithManagementPlugin()
+//    .WithDataVolume()
+//    .WithLifetime(ContainerLifetime.Persistent);
 
 var migrations = builder.AddProject<Projects.Havensread_MigrationService>("migrations")
     .WithReference(appDb)
@@ -45,8 +45,8 @@ var ingestion = builder
     .WithReference(ingDb)
     .WaitFor(ingDb)
     .WithReference(vectorDb)
-    .WaitFor(vectorDb)
-    .WithReference(rabbitmq);
+    .WaitFor(vectorDb);
+    //.WithReference(rabbitmq);
 
 var web = builder
     .AddProject<Projects.Havensread_Web>("havensread-web")
@@ -54,7 +54,7 @@ var web = builder
     .WaitFor(appDb)
     .WithReference(api)
     .WaitFor(migrations)
-    .WithReference(vectorDb)
-    .WithReference(rabbitmq);
+    .WithReference(vectorDb);
+    //.WithReference(rabbitmq);
 
 builder.Build().Run();
