@@ -1,4 +1,19 @@
-@import url('lib/tailwindcss/dist/preflight.css');
+/*@import url('lib/tailwindcss/dist/preflight.css');*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+    /* Custom theme (optional) */
+    --color-haven-blue: #3490dc;
+    --color-haven-green: #38c172;
+    --color-haven-red: #e3342f;
+    --font-sans: "Inter", sans-serif; /* Example custom font */
+}
+
+/* Custom components */
+.worker-badge {
+    @apply px-2 py-1 rounded text-xs font-medium capitalize;
+}
 
 html {
     min-height: 100vh;

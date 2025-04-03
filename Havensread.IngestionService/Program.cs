@@ -1,12 +1,10 @@
+using Havensread.Connector;
 using Havensread.Data;
 using Havensread.IngestionService;
-using Havensread.IngestionService.Workers;
-using MassTransit;
-using Microsoft.AspNetCore.SignalR;
-using Havensread.Connector;
-using Havensread.Connector.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.AddDatabase();
 
@@ -18,7 +16,13 @@ builder.AddHttpClients();
 
 builder.Services.AddWorkers();
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(o =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        o.EnableDetailedErrors = true;
+    }
+});
 
 //builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
 

@@ -1,0 +1,13 @@
+{
+  "Id": "0195ec9e-fbc0-7b88-999a-8121f67d3343",
+  "Source": "BookIngestionHandler",
+  "Version": 0,
+  "Timestamp": "2025-03-31T14:35:26.1411236+00:00",
+  "Records": [
+    {
+      "Id": "aHR0cHM6Ly93d3cuZ29vZHJlYWRzLmNvbS9ib29rL3Nob3cvMTAwMDIuVGhyZWVfUGxheXM=",
+      "DocumentId": "0195ec9e-fbc0-7b88-999a-8121f67d3343",
+      "DocumentSource": "BookIngestionHandler"
+    }
+  ]
+}

@@ -1,16 +1,17 @@
 ﻿using Havensread.IngestionService.Apis;
+using Havensread.ServiceDefaults.Misc;
 using Microsoft.Extensions.AI;
 using Microsoft.ML.Tokenizers;
-using Microsoft.SemanticKernel.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
 namespace Havensread.IngestionService.Workers.Book;
 
-public sealed class BookIngestionHandler
+public sealed partial class BookIngestionHandler
 {
     public sealed record Request(Guid Id, string Title, string? ISBN);
 
@@ -63,6 +64,7 @@ public sealed class BookIngestionHandler
         TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
     };
     private readonly Tokenizer _tokenizer;
+    private const int MaxCharacterCount = 14_000;
 
     private const string Prompt = """
         You will be provided with a chunk of text taken from the internet.
@@ -109,43 +111,46 @@ public sealed class BookIngestionHandler
         IAsyncEnumerable<Request> requests,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        List<Response> responses = [];
-
-        var options = new ParallelOptions
+        await foreach (var request in requests)
         {
-            //Environment.ProcessorCount, with multiple workers this might become sketchy to parallelize
-            // wonder if if i can derive a good number from processor count and active worker count
-            MaxDegreeOfParallelism = 3,
-            CancellationToken = cancellationToken
-        };
-
-        await Parallel.ForEachAsync(requests, options, async (request, token) =>
-        {
-            var url = $"{_googleClient.BaseAddress}&q={Uri.EscapeDataString(request.Title)}";
-            var searchResponse = await _googleClient.GetFromJsonAsync<GoogleSearch.Result>(url);
-            var searchItem = searchResponse?.Items?.FirstOrDefault();
+            var searchItem = await GetFirstGoogleSearchResultAsync(request);
 
             if (searchItem is null)
             {
-                responses.Add(new() { Id = request.Id, Title = request.Title, Status = Status.BadQuery });
-                return;
+                yield return new() { Id = request.Id, Title = request.Title, Status = Status.BadQuery };
+                continue;
             }
 
-            var content = await _jinaClient.GetStringAsync($"{_jinaClient.BaseAddress}{searchItem.Link}");
-            var chunks = TextChunker.SplitPlainTextParagraphs([content], 8000, 1000, request.Title, text => _tokenizer.CountTokens(text));
 
-            var prompt = string.Format(Prompt, request.Title, chunks[0]);
-            var response = await TryAsync(() =>
-                _chatClient.GetResponseAsync<BookInformation>(prompt, s_jsonSerializerOptions, _chatOptions, true, cancellationToken));
-            if (response.Error) return;
 
-            if (response.Value.Result.Error)
+            //var content = await _jinaClient.GetStringAsync($"{_jinaClient.BaseAddress}{searchItem.Link}");
+            //var scrapeResponse = await _jinaClient.GetStreamAsync($"{_jinaClient.BaseAddress}{searchItem.Link}");
+
+            //using var reader = new StreamReader(scrapeResponse);
+
+            //char[] buffer = new char[1024];
+            //int bytesRead = await reader.ReadBlockAsync(buffer, 0, MaxCharacterCount);
+            //var content = new string(buffer, 0, bytesRead);
+
+
+            var content = await GetFirstRenderedJinaContentAsync($"{_jinaClient.BaseAddress}{searchItem.Link}");
+            //var content = await _jinaClient.GetStringAsync($"{_jinaClient.BaseAddress}{searchItem.Link}");
+
+            //var chunks = TextChunker.SplitPlainTextParagraphs([content], 4000, 1000, request.Title, text => _tokenizer.CountTokens(text));
+
+            var prompt = string.Format(Prompt, request.Title, content);
+
+            var response = await Try.Execute(() =>
+                _chatClient.GetResponseAsync<BookInformation>(prompt, s_jsonSerializerOptions, _chatOptions, true, cancellationToken),
+                (ex) => _logger.LogInformation(ex, "Chat client error while attempting to resolve {Type}", nameof(BookInformation)));
+
+            if (response.Error || response.Value.Result.Error)
             {
-                responses.Add(new() { Id = request.Id, Title = request.Title, Status = Status.BadResult, SourceLink = searchItem.Link });
-                return;
+                yield return new() { Id = request.Id, Title = request.Title, Status = Status.BadResult, SourceLink = searchItem.Link };
+                continue;
             }
 
-            responses.Add(new()
+            yield return new()
             {
                 Id = request.Id,
                 Status = Status.Complete,
@@ -153,37 +158,41 @@ public sealed class BookIngestionHandler
                 {
                     Synopsis = response.Value.Result.Synopsis,
                     Genres = response.Value.Result.Genres,
-                    AuthorInformation = response.Value.Result.AuthorInformation
+                    MainAuthorName = response.Value.Result.MainAuthorName,
+                    AuthorInformation = response.Value.Result.AuthorInformation,
+                    MentionedAuthorNames = response.Value.Result.MentionedAuthorNames,
                 },
                 Title = request.Title,
                 SourceLink = searchItem.Link
-            });
-        });
-
-        foreach (var response in responses)
-        {
-            yield return response;
+            };
         }
     }
 
-    public sealed class TryResult<T>
+    private async Task<GoogleSearch.Item?> GetFirstGoogleSearchResultAsync(Request request)
     {
-        [MemberNotNullWhen(false, nameof(Value))]
-        public bool Error { get; init; }
-        public T? Value { get; init; }
+        var url = $"{_googleClient.BaseAddress}&q={Uri.EscapeDataString(request.Title)}";
+        var searchResponse = await _googleClient.GetFromJsonAsync<GoogleSearch.Result>(url);
+
+        return searchResponse?.Items?.FirstOrDefault();
     }
 
-    public async Task<TryResult<T>> TryAsync<T>(Func<Task<T>> func)
+    private async Task<string> GetFirstRenderedJinaContentAsync(string url)
     {
-        try
+        var stream = await _jinaClient.GetStreamAsync(url);
+        using var reader = new StreamReader(stream);
+
+        var buffer = new char[4096];
+        var result = new StringBuilder();
+
+        while (result.Length < MaxCharacterCount)
         {
-            var result = await func();
-            return new() { Value = result };
+            var memory = buffer.AsMemory(0, Math.Min(buffer.Length, MaxCharacterCount - result.Length));
+            var charsRead = await reader.ReadAsync(memory);
+            if (charsRead == 0) break;
+
+            result.Append(buffer.AsSpan(0, charsRead));
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while executing function {Name}.", func.Method.Name);
-            return new() { Error = true };
-        }
+
+        return result.ToString();
     }
 }

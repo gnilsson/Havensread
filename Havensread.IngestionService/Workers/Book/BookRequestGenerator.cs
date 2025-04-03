@@ -1,6 +1,7 @@
 ﻿using Havensread.Data.App;
 using Havensread.Data.Ingestion;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Metrics;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
@@ -37,16 +38,12 @@ public sealed class BookRequestGenerator
             if (s_requests.Count == 0)
             {
                 _iteration = 0;
-
                 var requestsBatch = await GetBookRequestsAsync().ToArrayAsync();
-
                 s_requests.AddRange(requestsBatch.Chunk(WorkerDefaults.ChunkSize));
             }
 
             var requestsChunk = s_requests.Skip(_iteration).First();
-
             await s_channel.Writer.WriteAsync(requestsChunk, cancellationToken);
-
             _iteration++;
 
             if (_iteration * WorkerDefaults.ChunkSize == WorkerDefaults.BatchSize)
@@ -64,7 +61,7 @@ public sealed class BookRequestGenerator
 
         var ingestedBookIds = await ingestionDbContext.Documents
             .AsNoTracking()
-            .Where(x => x.Source == nameof(BookIngestionHandler) && x.Version == 0)
+            .Where(x => x.Source == nameof(BookIngestionHandler) && x.Version == 0 && x.Timestamp != DateTimeOffset.MaxValue)
             .Select(x => x.Id)
             .ToArrayAsync();
 

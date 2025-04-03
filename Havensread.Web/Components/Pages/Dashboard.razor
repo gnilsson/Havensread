@@ -1,34 +1,70 @@
 ﻿@page "/dashboard"
-
 @using Havensread.Connector
-@using Havensread.Connector.Messages
-@* @using MassTransit *@
-@using Microsoft.AspNetCore.SignalR.Client
-@inject NavigationManager Navigation
-@* @inject IBus Bus *@
 
-<PageTitle>Dashboard</PageTitle>
+@implements IAsyncDisposable
+@inject ILogger<Dashboard> Logger
 
-<button @onclick="StartWorkers">Start Workers</button>
-<button @onclick="StopCoordinator">Stop Coordinator</button>
-<button @onclick="() => StartWorker(WorkerNames.BookIngestionWorker)">Start Worker</button>
-<button @onclick="() => StopWorker(WorkerNames.BookIngestionWorker)">Stop Worker</button>
-@* <button @onclick="Send">Send</button> *@
+<div class="max-w-6xl mx-auto p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-1">
+            <span class="h-3 w-3 rounded-full @(IsConnected ? "bg-green-500 animate-ping" : "bg-red-500")"></span>
+            <span class="text-sm">@_hubConnection?.State.ToString()</span>
+        </div>
+        <button @onclick="StartWorkers"
+                disabled="(!IsConnected)"
+                class="px-3 py-1 text-sm rounded bg-haven-green hover:bg-green-600 text-white">
+            Start All
+        </button>
+    </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Worker Name</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @* @foreach (var worker in workerStatuses)
-        {
-            <tr>
-                <td>@worker.Name</td>
-                <td>@worker.Status</td>
-            </tr>
-        } *@
-    </tbody>
-</table>
+    <!-- Error Alert -->
+    @if (_error)
+    {
+        <div class="bg-red-100 border-l-4 border-red-500 p-4 mb-6">
+            <p class="text-red-700">Operation error occurred</p>
+        </div>
+    }
+
+    <!-- Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Command Time</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @foreach (var worker in _workerDatas)
+                {
+                    <tr class="@(worker.State == Worker.State.Running ? "bg-green-50" : "")">
+                        <td class="px-6 py-4 whitespace-nowrap font-medium">@worker.Name</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="worker-badge @(worker.State == Worker.State.Running ? "bg-haven-green text-white animate-pulse" : "bg-gray-200 text-gray-800")">
+                                @worker.State
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            @worker.LastCommandTime.ToString("MMM dd, HH:mm:ss")
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap space-x-2">
+                            <button @onclick="() => StartWorker(worker.Name)"
+                                    disabled="@(worker.State == Worker.State.Running || !IsConnected)"
+                                    class="px-3 py-1 text-sm rounded @GetButtonClass(worker.State, "start")">
+                                Start
+                            </button>
+                            <button @onclick="() => StopWorker(worker.Name)"
+                                    disabled="@(worker.State != Worker.State.Running || !IsConnected)"
+                                    class="px-3 py-1 text-sm rounded @GetButtonClass(worker.State, "stop")">
+                                Stop
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -20,7 +20,7 @@ public static class LocalStorageHelper
 
         if (dataArray.Length == 0) return;
 
-        var outputDir = Path.Combine(PathUtils.SolutionDirectory, "seeddata", outputDirName);
+        var outputDir = Path.Combine(PathUtils.SolutionDirectory, DirectoryName.SeedData, outputDirName);
 
         if (!Directory.Exists(outputDir))
         {
@@ -40,13 +40,14 @@ public static class LocalStorageHelper
     }
 
     public static async IAsyncEnumerable<T> ReadFromJsonDiskAsync<T>(
-        string jsonDir,
+        string outputDirName,
         JsonSerializerOptions options,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        if (!Directory.Exists(jsonDir)) yield break;
+        var outputDir = Path.Combine(PathUtils.SolutionDirectory, DirectoryName.SeedData, outputDirName);
+        if (!Directory.Exists(outputDirName)) yield break;
 
-        var files = Directory.EnumerateFiles(jsonDir, "*.json").ToArray();
+        var files = Directory.EnumerateFiles(outputDirName, "*.json").ToArray();
         var batchSize = Environment.ProcessorCount / 3;
 
         for (int i = 0; i < files.Length; i += batchSize)

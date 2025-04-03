@@ -6,8 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-builder.Services.AddSignalR();
-
+builder.Services.AddSignalR(o =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        o.EnableDetailedErrors = true;
+    }
+});
 //builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
 
 //builder.Services.AddMassTransit(x =>

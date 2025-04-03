@@ -3,7 +3,7 @@ using Havensread.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace Havensread.Api.Data;
+namespace Havensread.Data.Interceptors;
 
 public sealed class DevelopmentIngestionInterceptor : SaveChangesInterceptor
 {
@@ -14,7 +14,7 @@ public sealed class DevelopmentIngestionInterceptor : SaveChangesInterceptor
             .Where(x => x.State is EntityState.Added or EntityState.Modified && x.Entity is IngestedDocument)
             .Select(x => (IngestedDocument)x.Entity);
 
-        await LocalStorageHelper.WriteToJsonDiskAsync(entities, e => e.Id.ToString(), "ingestedDocuments", cancellationToken);
+        await LocalStorageHelper.WriteToJsonDiskAsync(entities, e => e.Id.ToString(), DirectoryName.IngestedDocuments, cancellationToken);
 
         return result;
     }

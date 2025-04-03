@@ -6,6 +6,7 @@ using Havensread.ServiceDefaults;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Http.Resilience;
 using OpenAI;
+using OpenTelemetry.Logs;
 using Polly;
 using System.ClientModel;
 using System.Net;
@@ -26,7 +27,9 @@ public static class ApplicationInitializationExtensions
         foreach (var workerType in workerTypes)
         {
             services.AddSingleton(typeof(IWorker), workerType);
-            otelBuilder.WithTracing(tracing => tracing.AddSource(workerType.Name));
+            otelBuilder
+                .WithTracing(tracing => tracing.AddSource(workerType.Name))
+                .WithMetrics(metrics => metrics.AddMeter(workerType.Name));
         }
 
         services.AddSingleton<WorkerCoordinator>();
@@ -102,6 +105,10 @@ public static class ApplicationInitializationExtensions
             client.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8");
             client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
             client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate");
+            client.DefaultRequestHeaders.Add("X-Engine", "browser");
+            client.DefaultRequestHeaders.Add("X-Return-Format", "text");
+            client.DefaultRequestHeaders.Add("X-Retain-Images", "none");
+            client.DefaultRequestHeaders.Add("X-Target-Selector", "body, .class");
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
         {
             AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
