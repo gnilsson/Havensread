@@ -10,7 +10,7 @@ public static class LocalStorageHelper
         WriteIndented = true,
     };
 
-    public static async Task WriteToJsonDiskAsync<T>(
+    public static async Task WriteJsonAsync<T>(
         IEnumerable<T> data,
         Func<T, string> idSelector,
         string outputDirName,
@@ -20,10 +20,7 @@ public static class LocalStorageHelper
 
         if (dataArray.Length == 0) return;
 
-        var outputDir = Path.Combine(
-            PathUtils.SolutionDirectory,
-            "seeddata",
-            outputDirName);
+        var outputDir = Path.Combine(PathUtils.SolutionDirectory, DirectoryName.SeedData, outputDirName);
 
         if (!Directory.Exists(outputDir))
         {
@@ -32,7 +29,7 @@ public static class LocalStorageHelper
 
         await Parallel.ForEachAsync(data, new ParallelOptions
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount / 2,
+            MaxDegreeOfParallelism = Environment.ProcessorCount / 3,
             CancellationToken = cancellationToken
         }, async (entity, ct) =>
         {
@@ -42,15 +39,16 @@ public static class LocalStorageHelper
         });
     }
 
-    public static async IAsyncEnumerable<T> ReadFromJsonDiskAsync<T>(
-        string jsonDir,
+    public static async IAsyncEnumerable<T> ReadJsonAsync<T>(
+        string outputDirName,
         JsonSerializerOptions options,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        if (!Directory.Exists(jsonDir)) yield break;
+        var outputDir = Path.Combine(PathUtils.SolutionDirectory, DirectoryName.SeedData, outputDirName);
+        if (!Directory.Exists(outputDirName)) yield break;
 
-        var files = Directory.EnumerateFiles(jsonDir, "*.json").ToArray();
-        var batchSize = Environment.ProcessorCount / 2;
+        var files = Directory.EnumerateFiles(outputDirName, "*.json").ToArray();
+        var batchSize = Environment.ProcessorCount / 3;
 
         for (int i = 0; i < files.Length; i += batchSize)
         {

@@ -1,9 +1,12 @@
 ﻿using Havensread.Connector;
 using Havensread.IngestionService.Apis;
 using Havensread.IngestionService.Workers;
+using Havensread.IngestionService.Workers.Book;
 using Havensread.ServiceDefaults;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Http.Resilience;
 using OpenAI;
+using OpenTelemetry.Logs;
 using Polly;
 using System.ClientModel;
 using System.Net;
@@ -13,24 +16,28 @@ namespace Havensread.IngestionService;
 
 public static class ApplicationInitializationExtensions
 {
-    public static IServiceCollection AddIngestionWorkers(this IServiceCollection services)
+    public static IServiceCollection AddWorkers(this IServiceCollection services)
     {
-        // get an enumerable of all classes inheriting from IWorker
-        var workerTypes = typeof(ApplicationInitializationExtensions).Assembly
+        var workerTypes = typeof(Program).Assembly
             .GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && typeof(IWorker).IsAssignableFrom(t));
+
+        var otelBuilder = services.AddOpenTelemetry();
 
         foreach (var workerType in workerTypes)
         {
             services.AddSingleton(typeof(IWorker), workerType);
+            otelBuilder
+                .WithTracing(tracing => tracing.AddSource(workerType.Name))
+                .WithMetrics(metrics => metrics.AddMeter(workerType.Name));
         }
 
         services.AddSingleton<WorkerCoordinator>();
         services.AddSingleton<IWorkerCoordinator>(sp => sp.GetRequiredService<WorkerCoordinator>());
         services.AddHostedService<WorkerCoordinator>(sp => sp.GetRequiredService<WorkerCoordinator>());
-        //services.AddHostedService<TestB>();
 
-        services.AddScoped<BookIngestionDataCollector>();
+        services.AddSingleton<BookRequestGenerator>();
+        services.AddScoped<BookIngestionHandler>();
 
         return services;
     }
@@ -55,29 +62,29 @@ public static class ApplicationInitializationExtensions
             .UseFunctionInvocation()
             .UseLogging()
             .UseOpenTelemetry();
+
         builder.Services.AddEmbeddingGenerator(embeddingGenerator);
 
         return builder;
     }
 
-
     public static IHostApplicationBuilder AddHttpClients(this IHostApplicationBuilder builder)
     {
         builder.Services
-            .AddDefaultWebAgentHttpClient("book-searcher", (sp, options) =>
+            .AddDefaultWebAgentHttpClient("book-searcher", (sp, client) =>
             {
                 var settings = builder.Configuration.GetRequiredSection(GoogleSettings.SectionName).Get<GoogleSettings>();
                 ArgumentNullException.ThrowIfNull(settings, nameof(settings));
 
-                options.BaseAddress = new Uri($"https://www.googleapis.com/customsearch/v1?key={settings.Token}&cx={settings.SearchEngineId}");
+                client.BaseAddress = new Uri($"https://www.googleapis.com/customsearch/v1?key={settings.Token}&cx={settings.SearchEngineId}");
             })
-            .AddDefaultWebAgentHttpClient("jina-reader", (sp, options) =>
+            .AddDefaultWebAgentHttpClient("jina-reader", (sp, client) =>
             {
                 var settings = builder.Configuration.GetRequiredSection(JinaSettings.SectionName).Get<JinaSettings>();
                 ArgumentNullException.ThrowIfNull(settings, nameof(settings));
 
-                options.BaseAddress = new Uri("https://r.jina.ai/");
-                options.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.Token);
+                client.BaseAddress = new Uri("https://r.jina.ai/");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.Token);
             });
 
         return builder;
@@ -98,7 +105,10 @@ public static class ApplicationInitializationExtensions
             client.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8");
             client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
             client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate");
-            client.Timeout = TimeSpan.FromMinutes(2);
+            client.DefaultRequestHeaders.Add("X-Engine", "browser");
+            client.DefaultRequestHeaders.Add("X-Return-Format", "text");
+            client.DefaultRequestHeaders.Add("X-Retain-Images", "none");
+            client.DefaultRequestHeaders.Add("X-Target-Selector", "body, .class");
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
         {
             AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
@@ -107,6 +117,9 @@ public static class ApplicationInitializationExtensions
         {
             options.Retry.BackoffType = DelayBackoffType.Exponential;
             options.Retry.UseJitter = true;
+            options.AttemptTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(10) };
+            options.TotalRequestTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(30) };
+            options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(20);
         });
 
         return services;

@@ -1,0 +1,23 @@
+{
+  "name": "havensread.web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i ./wwwroot/app.css -o ./wwwroot/lib/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./wwwroot/app.css -o ./wwwroot/lib/tailwind.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.23.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.17"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.17"
+  }
+}

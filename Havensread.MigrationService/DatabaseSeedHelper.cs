@@ -21,20 +21,19 @@ public static class DatabaseSeedHelper
         string solutionDir,
         CancellationToken cancellationToken)
     {
-        var jsonDir = Path.Combine(solutionDir, "seeddata", "ingestion");
-        if (!Directory.Exists(jsonDir)) return;
-
-        await foreach (var document in LocalStorageHelper.ReadFromJsonDiskAsync<IngestedDocument>(jsonDir, s_jsonOptions, cancellationToken))
+        await foreach (var document in LocalStorageHelper.ReadJsonAsync<IngestedDocument>(
+            DirectoryName.IngestedDocuments,
+            s_jsonOptions,
+            cancellationToken))
         {
             context.Documents.Add(document);
         }
 
-        var pointsJsonDir = Path.Combine(solutionDir, "seeddata", "points");
-        if (!Directory.Exists(pointsJsonDir)) return;
-
         var points = await LocalStorageHelper
-            .ReadFromJsonDiskAsync<PointStruct>(pointsJsonDir, s_jsonOptions, cancellationToken)
+            .ReadJsonAsync<PointStruct>(DirectoryName.Points, s_jsonOptions, cancellationToken)
             .ToArrayAsync();
+
+        if (points.Length == 0) return;
 
         var qdrantClient = serviceProvider.GetRequiredService<QdrantClient>();
         if (!await qdrantClient.CollectionExistsAsync(SourceName.Books))
@@ -48,11 +47,11 @@ public static class DatabaseSeedHelper
 
     public static async Task GenerateAppSeedDataAsync(AppDbContext context, string solutionDir, CancellationToken cancellationToken)
     {
-        var jsonDir = Path.Combine(solutionDir, "seeddata", "kaggle", "booksJson");
+        var jsonDir = Path.Combine(solutionDir, DirectoryName.SeedData, DirectoryName.Kaggle, DirectoryName.Books);
         if (!Directory.Exists(jsonDir)) return;
 
         List<string> existingAuthors = [];
-        await foreach (var kaggleBook in LocalStorageHelper.ReadFromJsonDiskAsync<Kaggle.Book>(jsonDir, s_jsonOptions, cancellationToken))
+        await foreach (var kaggleBook in LocalStorageHelper.ReadJsonAsync<Kaggle.Book>(jsonDir, s_jsonOptions, cancellationToken))
         {
             var authorNames = kaggleBook.Authors.Split('/').ToArray();
             var authors = authorNames.Select(a => new Author { Name = a }).ToArray();

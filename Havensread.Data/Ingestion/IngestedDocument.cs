@@ -15,4 +15,6 @@ public sealed class IngestedDocument
     //public ICollection<SourceLink> Links { get; init; } = [];
 
     public ICollection<IngestedRecord> Records { get; init; } = [];
+
+    // what worker processed this?
 }

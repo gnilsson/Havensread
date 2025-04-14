@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -23,14 +22,14 @@ public static class Extensions
 
         builder.Services.AddServiceDiscovery();
 
-        builder.Services.ConfigureHttpClientDefaults(http =>
-        {
-            // Turn on resilience by default
-            http.AddStandardResilienceHandler();
+        //builder.Services.ConfigureHttpClientDefaults(http =>
+        //{
+        //    // Turn on resilience by default
+        //    http.AddStandardResilienceHandler();
 
-            // Turn on service discovery by default
-            http.AddServiceDiscovery();
-        });
+        //    // Turn on service discovery by default
+        //    http.AddServiceDiscovery();
+        //});
 
         // Uncomment the following to restrict the allowed schemes for service discovery.
         // builder.Services.Configure<ServiceDiscoveryOptions>(options =>
@@ -130,4 +129,26 @@ public static class Extensions
         return builder;
     }
 
+    // note:
+    // some transient package mismatch somehow ...
+    //public static IHostApplicationBuilder AddMessageBus(this IHostApplicationBuilder builder)
+    //{
+    //    builder.AddRabbitMQClient(connectionName: "havensread-rabbitmq");
+
+    //    builder.Services.AddMassTransit(x =>
+    //    {
+    //        x.SetKebabCaseEndpointNameFormatter();
+    //        x.AddConsumer<ProcessingCommandConsumer>();
+
+    //        x.UsingRabbitMq((context, cfg) =>
+    //        {
+    //            var configuration = context.GetRequiredService<IConfiguration>();
+    //            var connection = configuration.GetConnectionString("havensread-rabbitmq");
+    //            cfg.Host(connection);
+    //            cfg.ConfigureEndpoints(context);
+    //        });
+    //    });
+
+    //    return builder;
+    //}
 }
