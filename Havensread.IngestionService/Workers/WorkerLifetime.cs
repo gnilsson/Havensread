@@ -18,7 +18,7 @@ internal sealed class WorkerLifetime : IDisposable
         Cts = new CancellationTokenSource();
     }
 
-    public void Start()
+    public void DeclareStarted()
     {
         State = Worker.State.Running;
         LastCommandTime = DateTimeOffset.UtcNow;

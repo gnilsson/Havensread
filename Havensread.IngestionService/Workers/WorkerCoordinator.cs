@@ -18,14 +18,12 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
     private readonly static Channel<Command> s_commandChannel = Channel.CreateUnbounded<Command>();
     private readonly ImmutableArray<IWorker> _workers;
     private readonly ConcurrentDictionary<string, WorkerLifetime> _workerLives = new();
-    //  private readonly ConcurrentDictionary<string, Worker.State> _workerStates;
     private readonly ILogger<WorkerCoordinator> _logger;
     private readonly IHubContext<WorkerHub, IWorkerHubClient> _hubContext;
 
     public WorkerCoordinator(IEnumerable<IWorker> workers, IHubContext<WorkerHub, IWorkerHubClient> hubContext, ILogger<WorkerCoordinator> logger)
     {
         _workers = workers.ToImmutableArray();
-        //    _workerStates = new(_workers.ToDictionary(w => w.Name, _ => Worker.State.Stopped));
         _workerLives = new(_workers.ToDictionary(w => w.Name, w => new WorkerLifetime(w.Name)));
         _hubContext = hubContext;
         _logger = logger;
@@ -36,22 +34,6 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
 
     public bool StopWorker(string workerName) =>
         s_commandChannel.Writer.TryWrite(new Command.Stop(workerName));
-
-    //public async Task StartWorkerAsync(string workerName)
-    //{
-    //    if (s_commandChannel.Writer.TryWrite(new Command.Start(workerName)))
-    //    {
-    //        await _hubContext.Clients.All.SendWorkerDatasAsync(GetWorkerDatas());
-    //    }
-    //}
-
-    //public async Task StopWorkerAsync(string workerName)
-    //{
-    //    if (s_commandChannel.Writer.TryWrite(new Command.Stop(workerName)))
-    //    {
-    //        await _hubContext.Clients.All.SendWorkerDatasAsync(GetWorkerDatas());
-    //    }
-    //}
 
     public IEnumerable<Worker.Data> GetWorkerDatas()
     {
@@ -86,15 +68,12 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
 
     private bool StartWorkerImpl(string workerName)
     {
-        //if (!_workers.Any(w => w.Name == workerName))
         if (!_workerLives.TryGetValue(workerName, out var endedLife))
         {
             _logger.LogWarning("Worker {WorkerName} not found.", workerName);
             return false;
         }
 
-        //if (_workerLives.TryGetValue(workerName, out var life) && life.State is Worker.State.Running)
-        //if (_workerLives.ContainsKey(workerName) || _workerStates[workerName] == Worker.State.Running)
         if (endedLife.State is Worker.State.Running)
         {
             _logger.LogWarning("Worker {WorkerName} is already running.", workerName);
@@ -102,7 +81,7 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
         }
 
         var newLife = endedLife.State is Worker.State.Initialized ? endedLife : new WorkerLifetime(workerName);
-        newLife.Start();
+        newLife.DeclareStarted();
 
         if (!_workerLives.TryUpdate(workerName, newLife, endedLife))
         {
@@ -113,10 +92,7 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
         _ = ExecuteWorkerAsync(workerName, newLife)
             .ContinueWith(t =>
             {
-                if (t.IsFaulted)
-                {
-                    _logger.LogError(t.Exception, "Worker {WorkerName} crashed", workerName);
-                }
+                _logger.LogError(t.Exception, "Worker {WorkerName} crashed", workerName);
             }, TaskContinuationOptions.OnlyOnFaulted);
 
         return true;
@@ -143,15 +119,9 @@ public sealed class WorkerCoordinator : BackgroundService, IWorkerCoordinator
                 activity?.SetStatus(ActivityStatusCode.Error);
                 _logger.LogError(ex, "Worker {WorkerName} failed.", workerName);
             }
-            finally
-            {
-                // The lifetime handles the disposal.
-                //_workerLives[workerName].State = Worker.State.Stopped;
-            }
         }
     }
 
-    // when I stop will finally trigger?
     private bool StopWorkerImpl(string workerName)
     {
         if (_workerLives.TryGetValue(workerName, out var lifetime))

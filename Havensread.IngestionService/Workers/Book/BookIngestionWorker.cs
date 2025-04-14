@@ -67,7 +67,7 @@ internal sealed class BookIngestionWorker : IWorker
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") is "Development")
             {
                 await LocalStorageHelper
-                    .WriteToJsonDiskAsync(points, p => p.Id.Uuid, DirectoryName.Points, CancellationToken.None)
+                    .WriteJsonAsync(points, p => p.Id.Uuid, DirectoryName.Points, CancellationToken.None)
                     .ConfigureAwait(false);
             }
 

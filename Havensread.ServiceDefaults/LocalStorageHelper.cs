@@ -10,7 +10,7 @@ public static class LocalStorageHelper
         WriteIndented = true,
     };
 
-    public static async Task WriteToJsonDiskAsync<T>(
+    public static async Task WriteJsonAsync<T>(
         IEnumerable<T> data,
         Func<T, string> idSelector,
         string outputDirName,
@@ -39,7 +39,7 @@ public static class LocalStorageHelper
         });
     }
 
-    public static async IAsyncEnumerable<T> ReadFromJsonDiskAsync<T>(
+    public static async IAsyncEnumerable<T> ReadJsonAsync<T>(
         string outputDirName,
         JsonSerializerOptions options,
         [EnumeratorCancellation] CancellationToken cancellationToken)

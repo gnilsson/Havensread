@@ -21,7 +21,7 @@ public static class DatabaseSeedHelper
         string solutionDir,
         CancellationToken cancellationToken)
     {
-        await foreach (var document in LocalStorageHelper.ReadFromJsonDiskAsync<IngestedDocument>(
+        await foreach (var document in LocalStorageHelper.ReadJsonAsync<IngestedDocument>(
             DirectoryName.IngestedDocuments,
             s_jsonOptions,
             cancellationToken))
@@ -30,7 +30,7 @@ public static class DatabaseSeedHelper
         }
 
         var points = await LocalStorageHelper
-            .ReadFromJsonDiskAsync<PointStruct>(DirectoryName.Points, s_jsonOptions, cancellationToken)
+            .ReadJsonAsync<PointStruct>(DirectoryName.Points, s_jsonOptions, cancellationToken)
             .ToArrayAsync();
 
         if (points.Length == 0) return;
@@ -51,7 +51,7 @@ public static class DatabaseSeedHelper
         if (!Directory.Exists(jsonDir)) return;
 
         List<string> existingAuthors = [];
-        await foreach (var kaggleBook in LocalStorageHelper.ReadFromJsonDiskAsync<Kaggle.Book>(jsonDir, s_jsonOptions, cancellationToken))
+        await foreach (var kaggleBook in LocalStorageHelper.ReadJsonAsync<Kaggle.Book>(jsonDir, s_jsonOptions, cancellationToken))
         {
             var authorNames = kaggleBook.Authors.Split('/').ToArray();
             var authors = authorNames.Select(a => new Author { Name = a }).ToArray();
